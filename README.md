@@ -9,6 +9,9 @@ see [MEMO.md](MEMO.md).
 All funds, investors and documents in this repo are synthetic.
 
 
+## The demo
+A six-step story with a working product inside it: the problem, today's queue (without and with the AI pre-check), reviewing one booklet with evidence highlighted on the page, the evals, an impact calculator, and the plan. Each step has a PM note and a button to the next one. Visual direction follows the ui-ux-pro-max guidance for document-workflow products: Swiss minimal, accessible, trust navy with status colors, Inter, no emoji icons.
+
 ## What it does
 1. **Extract:** Claude Opus 5.5 reads the booklet and returns typed fields (investor, type, commitment
    in figures and in words, US person, accreditation basis, tax form, signature), each with a page
@@ -50,7 +53,8 @@ Requests use server-side refusal fallback (`fallbacks: "default"`); a refused pa
 
 ## Layout
 ```
-app.py                 Streamlit review screen
+app.py                 guided demo: 6-step product story around a working review screen
+reviewer/highlight.py  draws the evidence quotes on the PDF page
 reviewer/extract.py    Claude call, structured output, grounding
 reviewer/rules.py      deterministic checks
 reviewer/fund_terms.py fund minimum and tax-form rules
