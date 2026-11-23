@@ -7,7 +7,7 @@ was flagged.
 
 from dataclasses import dataclass
 
-from .fund_terms import ENTITY_TYPES, MINIMUM_COMMITMENT_USD, expected_tax_form
+from .fund_terms import ENTITY_TYPES, INDIVIDUAL_TYPES, MINIMUM_COMMITMENT_USD, expected_tax_form
 
 CRITICAL = "critical"
 WARNING = "warning"
@@ -29,7 +29,7 @@ def check(fields: dict) -> list[Flag]:
 
     if not fields.get("signed"):
         flags.append(Flag("MISSING_SIGNATURE", CRITICAL,
-                          "The signature page is not signed.", ["signed"]))
+                          "The signature page has not been signed.", ["signed"]))
 
     if figures is not None and words is not None and abs(figures - words) > 0.5:
         flags.append(Flag("AMOUNT_MISMATCH", CRITICAL,
@@ -45,7 +45,7 @@ def check(fields: dict) -> list[Flag]:
 
     if not fields.get("accreditation_basis"):
         flags.append(Flag("NO_ACCREDITATION", CRITICAL,
-                          "No accredited-investor basis is selected in the questionnaire.",
+                          "None of the accredited-investor boxes in the questionnaire is ticked.",
                           ["accreditation_basis"]))
 
     investor_type = fields.get("investor_type")
@@ -54,13 +54,17 @@ def check(fields: dict) -> list[Flag]:
     if investor_type and us_person is not None:
         expected = expected_tax_form(investor_type, us_person)
         if tax_form != expected:
+            who = ("a U.S. investor" if us_person else
+                   "a non-U.S. individual" if investor_type in INDIVIDUAL_TYPES else "a non-U.S. entity")
+            found = f"Form {tax_form}" if tax_form and tax_form != "none" else "no tax form"
             flags.append(Flag("TAX_FORM_MISMATCH", CRITICAL,
-                              f"Expected {expected} for this investor, found {tax_form or 'no form'}.",
+                              f"{who[0].upper() + who[1:]} must send Form {expected}; this booklet has {found}.",
                               ["tax_form", "investor_type", "us_person"]))
 
     if investor_type in ENTITY_TYPES and fields.get("signed") and not fields.get("signatory_title"):
         flags.append(Flag("MISSING_SIGNATORY_TITLE", WARNING,
-                          "An entity investor signed without stating the signatory's title.",
+                          "The investor is a company, trust or partnership, but the signer's title "
+                          "(for example Director or Trustee) is missing.",
                           ["signatory_title"]))
 
     return flags

@@ -29,27 +29,27 @@ DEMO_MODE = os.environ.get("REVIEWER_BACKEND") != "claude-code" and not os.envir
 
 STEPS = [
     ("problem", "The problem"),
-    ("queue", "Today's queue"),
-    ("review", "Review one booklet"),
-    ("trust", "Can we trust it?"),
-    ("impact", "What is it worth?"),
-    ("next", "Why Anduin, what's next"),
+    ("queue", "The review queue"),
+    ("review", "Inside one booklet"),
+    ("trust", "How accurate is it?"),
+    ("impact", "What does it save?"),
+    ("next", "Fit and next steps"),
 ]
 STEP_KEYS = [k for k, _ in STEPS]
 
 LABELS = {
     "investor_name": "Investor name", "investor_type": "Investor type",
-    "commitment_amount_figures": "Commitment (figures)",
-    "commitment_amount_words": "Commitment (words, as written)",
-    "commitment_amount_words_value": "Commitment (words, as number)",
-    "us_person": "U.S. person", "accreditation_basis": "Accreditation basis",
+    "commitment_amount_figures": "Commitment in figures",
+    "commitment_amount_words": "Commitment in words (as written)",
+    "commitment_amount_words_value": "Commitment in words (as a number)",
+    "us_person": "U.S. person for tax", "accreditation_basis": "Accredited-investor basis",
     "tax_form": "Tax form enclosed", "signed": "Signed", "signatory_name": "Signatory name",
     "signatory_title": "Signatory title", "signature_date": "Signature date",
 }
 FLAG_TITLES = {
-    "MISSING_SIGNATURE": "Signature missing", "AMOUNT_MISMATCH": "Amounts disagree",
-    "BELOW_MINIMUM": "Below fund minimum", "NO_ACCREDITATION": "No accreditation basis",
-    "TAX_FORM_MISMATCH": "Wrong tax form", "MISSING_SIGNATORY_TITLE": "Signatory title missing",
+    "MISSING_SIGNATURE": "Not signed", "AMOUNT_MISMATCH": "Amount in words and figures differ",
+    "BELOW_MINIMUM": "Below the minimum commitment", "NO_ACCREDITATION": "Accredited-investor status not confirmed",
+    "TAX_FORM_MISMATCH": "Wrong tax form", "MISSING_SIGNATORY_TITLE": "Signer's title missing",
 }
 BOOL_FIELDS = {"us_person", "signed"}
 NUM_FIELDS = {"commitment_amount_figures", "commitment_amount_words_value"}
@@ -65,7 +65,7 @@ st.html("""
 --soft:#EEF2F7;--ok:#15803D;--ok-bg:#DCFCE7;--warn:#92400E;--warn-bg:#FEF3C7;--crit:#B91C1C;--crit-bg:#FEE2E2;}
 html, body, [data-testid="stAppViewContainer"] *:not([data-testid="stIconMaterial"]),
 [data-testid="stSidebar"] *:not([data-testid="stIconMaterial"]){font-family:'Inter',system-ui,sans-serif;}
-[data-testid="stAppViewContainer"] .block-container{max-width:1180px;padding-top:2rem;}
+[data-testid="stAppViewContainer"] .block-container{max-width:1180px;padding-top:4.75rem;}
 .eyebrow{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin:0 0 6px}
 .hero{font-size:34px;line-height:1.2;font-weight:700;color:var(--fg);margin:0 0 10px;letter-spacing:-.01em}
 .lead{font-size:17px;line-height:1.6;color:var(--muted);max-width:760px;margin:0 0 20px}
@@ -168,6 +168,26 @@ def header(eyebrow: str, title: str, lead: str = ""):
             + (f'<p class="lead">{lead}</p>' if lead else ""))
 
 
+def plural(n: int, word: str) -> str:
+    return f"{n} {word}" + ("" if n == 1 else "s")
+
+
+# Where to look when the problem is a blank (nothing for the AI to quote). Matches the booklet template.
+BLANK_LOCATION = {
+    "NO_ACCREDITATION": (2, "Part B. Accredited investor status"),
+    "MISSING_SIGNATURE": (4, "Signature:"),
+    "MISSING_SIGNATORY_TITLE": (4, "Title:"),
+}
+
+
+def flag_evidence(fl, ev) -> list[dict]:
+    quotes = [e for fd in fl.fields for e in ev.get(fd, [])]
+    if not quotes and fl.code in BLANK_LOCATION:
+        page, text = BLANK_LOCATION[fl.code]
+        quotes = [{"page": page, "quote": text, "blank": True}]
+    return quotes
+
+
 def badge(kind: str, text: str) -> str:
     return f'<span class="badge {kind}">{text}</span>'
 
@@ -237,18 +257,21 @@ def page_image(pid: str, page_index: int, marks: tuple):
 # ---------- step 1: the problem ----------
 
 def step_problem():
-    header("Closing week at a fund administrator",
-           "Twenty subscription booklets arrived overnight. Which ones are safe to accept?",
-           "Every offline booklet is read page by page: signature, amounts, minimum, accreditation, "
-           "tax form. Problems surface late, closes slip, and the worst case is accepting a booklet that "
-           "should have been sent back.")
+    header("A closing week at a fund administrator",
+           "Twenty subscription booklets arrive overnight. Which ones can the fund accept?",
+           "Before a fund accepts an investor, someone checks every page of the subscription booklet: "
+           "signature, commitment amount, fund minimum, accredited-investor status and tax form. "
+           "A booklet with an error is not in good order (NIGO) and goes back to the investor. "
+           "Errors found late delay the close; an error that is missed means accepting a subscription "
+           "the fund should have rejected.")
     k = st.columns(3)
     kpis = [
-        ("74%", "of GPs say KYC adds 6 to 30 days to a fund close", "IQ-EQ fund managers survey, Apr 2026"),
-        ("63%", "of GPs lost investors over AML/KYC; documentation gaps were the main cause",
-         "CSC survey of 200 GPs and 200 LPs, Nov 2025"),
-        ("~$500B", "in US evergreen funds: more individual investors, more booklets per dollar raised",
-         "PitchBook US Evergreen Landscape, Q4 2025"),
+        ("74%", "of fund managers say KYC checks add 6 to 30 days to a fund close",
+         "IQ-EQ survey of fund managers, Apr 2026"),
+        ("63%", "of fund managers have lost investors over AML/KYC problems, most often missing or "
+                "incomplete documents", "CSC survey of 200 GPs and 200 LPs, Nov 2025"),
+        ("~$500B", "in US evergreen funds, the fast-growing route for individual investors. More "
+                   "investors means more booklets to check", "PitchBook, Q4 2025; MSCI, Mar 2026"),
     ]
     for col, (num, lbl, src) in zip(k, kpis):
         col.html(f'<div class="card kpi"><div class="num">{num}</div><div class="lbl">{lbl}</div>'
@@ -256,74 +279,84 @@ def step_problem():
     st.write("")
     left, right = st.columns([1.1, 1])
     with left:
-        st.html('<div class="h3">Who feels it</div>'
-                '<div class="card"><p><b>Reviewer at a fund administrator or GP ops team</b></p>'
-                '<p class="muted">"When a subscription arrives, I want to know quickly whether it is in good '
-                'order and exactly what is missing, so we close on time without ever accepting a defective '
-                'subscription."</p>'
-                '<p style="margin-top:10px">Also affected: the LP, who hears about problems late; the GP, whose '
-                'close slips; compliance, who owns the risk of a wrong acceptance.</p></div>')
+        st.html('<div class="h3">Who has the problem</div>'
+                '<div class="card"><p><b>The reviewer at the fund administrator or in the GP\'s operations team</b></p>'
+                '<p class="muted">"When a booklet arrives, I need to know quickly whether it is in good order '
+                'and exactly what is missing, so we close on time and never accept a booklet with an error."</p>'
+                '<p style="margin-top:10px">It also costs the investor (LP), who hears about problems late; '
+                'the GP, whose close slips; and compliance, who carries the risk of a wrong acceptance.</p></div>')
     with right:
-        st.html('<div class="h3">Where the gap is</div>'
-                '<div class="card"><p>Anduin\'s online forms already validate input as LPs type.</p>'
-                '<p>Offline PDFs are still re-keyed. Instant Extraction gets the data out, but its page '
-                'promises "80%+ accuracy out of the box" and leaves low-confidence fields to a human.</p>'
-                '<p>The final "is this in good order?" check is still a person reading pages.</p></div>')
-    note("The bet: if a model reads the booklet and code applies the fund's rules, reviewers only touch "
-         "the booklets that need them. Anduin lists a <b>Review Agent</b> on its 2026 timeline, and GP Con "
-         "2026 panels asked for exception-based review. This prototype is one way to build it.")
-    st.button("Open today's queue", icon=":material/inbox:", type="primary", on_click=go, args=("queue",))
+        st.html('<div class="h3">What Anduin already solves, and what is left</div>'
+                '<div class="card"><p><b>Solved:</b> investors who subscribe online fill in Anduin\'s forms, '
+                'which check the answers as they type.</p>'
+                '<p><b>Left:</b> investors who send a PDF. Anduin\'s Instant Extraction pulls the data out, '
+                'with "80%+ accuracy out of the box", and leaves fields it is unsure of to a person.</p>'
+                '<p><b>Left:</b> the final decision, "is this booklet in good order?", is still a person '
+                'reading every page.</p></div>')
+    note("My bet: let a model read the booklet, let fixed rules decide whether it is in good order, and send "
+         "only the booklets with a problem to a reviewer. Anduin lists a <b>Review Agent</b> on its 2026 "
+         "timeline, and fund operations panels at its GP Con 2026 asked for exception-based review. "
+         "This prototype shows one way to build it.")
+    st.button("See today's review queue", icon=":material/inbox:", type="primary", on_click=go, args=("queue",))
 
 
 # ---------- step 2: the queue ----------
 
 def step_queue():
-    header("The product", "Only the exceptions should reach a human",
-           "Same twenty booklets, two ways of working. Switch the view to see what changes for the reviewer.")
-    view = st.segmented_control("Way of working", ["Without AI", "With AI pre-check"],
+    header("The product", "Reviewers should only open the booklets that have a problem",
+           "The same twenty booklets, handled two ways. Switch between the views to see what changes "
+           "for the reviewer.")
+    view = st.segmented_control("Way of working", ["Without AI", "With the AI pre-check"],
                                 key="ai_view", label_visibility="collapsed")
     rows = [(pid, *status(pid)) for pid in sorted(TRUTH)]
     cleared = [r for r in rows if r[1] == "cleared"]
     attention = [r for r in rows if r[1] in ("critical", "check")]
+    with_errors = sum(1 for p in TRUTH if TRUTH[p]["flags"])
 
     if view == "Without AI":
         c = st.columns(3)
-        c[0].html('<div class="card kpi"><div class="num">20</div><div class="lbl">booklets to read page by page</div></div>')
-        c[1].html('<div class="card kpi"><div class="num">4</div><div class="lbl">pages per booklet, every field checked by hand</div></div>')
-        c[2].html('<div class="card kpi"><div class="num">?</div><div class="lbl">defects found only when someone reaches that page</div></div>')
-        note("Without a pre-check every booklet costs the same review time, whether it is clean or not. "
-             "Switch to <b>With AI pre-check</b> to see the queue the reviewer would get instead.")
+        c[0].html('<div class="card kpi"><div class="num">20</div><div class="lbl">booklets, each read '
+                  'page by page</div></div>')
+        c[1].html('<div class="card kpi"><div class="num">4</div><div class="lbl">pages per booklet, every '
+                  'field checked by hand</div></div>')
+        c[2].html(f'<div class="card kpi"><div class="num">{with_errors}</div><div class="lbl">of the 20 have '
+                  'an error, but you only find out which ones by reading all of them</div></div>')
+        note("Without a pre-check, a clean booklet takes as long to review as one with an error. "
+             "Switch to <b>With the AI pre-check</b> to see the queue the reviewer would get instead.")
         for pid, *_ in rows:
-            queue_row(pid, "neutral", "To review", "Not yet opened", button=False)
+            queue_row(pid, "neutral", "To review", "Not opened yet", button=False)
         st.write("")
-        st.button("See the same queue with the AI pre-check", icon=":material/auto_awesome:", type="primary",
-                  on_click=lambda: st.session_state.update(ai_view="With AI pre-check"))
+        st.button("Show the same queue with the AI pre-check", icon=":material/auto_awesome:", type="primary",
+                  on_click=lambda: st.session_state.update(ai_view="With the AI pre-check"))
         nav("problem", None)
         return
 
+    s = (load_eval("v2-na-fields.json") or {}).get("summary", {})
+    secs = f"{s['avg_latency_s']:.0f} seconds" if s else "seconds"
     c = st.columns(3)
     c[0].html(f'<div class="card kpi"><div class="num" style="color:var(--ok)">{len(cleared)}</div>'
-              '<div class="lbl">cleared: no rule fired and every field is backed by a quote on the page</div></div>')
+              '<div class="lbl">in good order, no reviewer time needed</div></div>')
     c[1].html(f'<div class="card kpi"><div class="num" style="color:var(--crit)">{len(attention)}</div>'
-              '<div class="lbl">need attention, each with the reason and the page it comes from</div></div>')
-    c[2].html('<div class="card kpi"><div class="num">~12s</div>'
-              '<div class="lbl">per booklet for the pre-check (Claude Opus 5.5, measured in the eval run)</div></div>')
-    note("Cleared is strict: no rule fired, every extracted field has a verbatim quote found on the cited page, "
-         "and the model did not mark anything as unsure. Anything else goes to a human, with the reason.")
+              '<div class="lbl">sent to the reviewer, each with the problem already described</div></div>')
+    c[2].html(f'<div class="card kpi"><div class="num">{secs}</div>'
+              '<div class="lbl">for the AI to read one booklet (average in testing)</div></div>')
+    note("A booklet counts as in good order only if three things hold: no rule found a problem, every value "
+         "the AI read is backed by a quote found on the page, and the AI did not flag anything it was unsure "
+         "of. If any one of these fails, a person reviews it.")
 
-    b1, b2, _ = st.columns([1.3, 1.3, 1])
-    b1.button("Open the hardest catch: SUB-018", icon=":material/search:", type="primary",
+    b1, b2, _ = st.columns([1.35, 1.35, 1])
+    b1.button("Open the hardest error: SUB-018", icon=":material/search:", type="primary",
               on_click=go, args=("review", "SUB-018"), use_container_width=True)
-    b2.button("Open a clean booklet: SUB-001", icon=":material/task_alt:",
+    b2.button("Open a booklet in good order", icon=":material/task_alt:",
               on_click=go, args=("review", "SUB-001"), use_container_width=True)
 
-    st.html('<div class="h3">Needs attention</div>')
+    st.html(f'<div class="h3">Sent to the reviewer ({len(attention)})</div>')
     for pid, kind, flags, needs in attention:
         why = ", ".join(FLAG_TITLES.get(f.code, f.code) for f in flags) or \
-              "Check: " + ", ".join(LABELS.get(n, n) for n in needs)
+              "AI unsure about: " + ", ".join(LABELS.get(n, n) for n in needs)
         queue_row(pid, "crit" if kind == "critical" else "warn",
-                  "Return or fix" if kind == "critical" else "Check", why)
-    st.html('<div class="h3">Cleared</div>')
+                  "Not in good order" if kind == "critical" else "Needs review", why)
+    st.html(f'<div class="h3">In good order ({len(cleared)})</div>')
     for pid, *_ in cleared:
         queue_row(pid, "ok", "In good order", "All checks passed")
     nav("problem", "review")
@@ -344,9 +377,9 @@ def step_review():
     pid = st.session_state.pid
     result = result_for(pid)
     top = st.columns([1, 3])
-    top[0].button("Back to queue", icon=":material/arrow_back:", on_click=go, args=("queue",))
+    top[0].button("Back to the queue", icon=":material/arrow_back:", on_click=go, args=("queue",))
     if result is None:
-        st.warning("No recorded result for this booklet yet. Run the eval to create one.")
+        st.warning("There is no saved result for this booklet yet. Run the test to create one.")
         return
 
     # Apply reviewer edits (kept by the editor widget) before running the rules.
@@ -362,99 +395,102 @@ def step_review():
     flags = check(fields)
     critical = [f for f in flags if f.severity == CRITICAL]
     if critical:
-        state_badge = badge("crit", f"Not in good order: {len(critical)} critical")
+        state_badge = badge("crit", f"Not in good order: {plural(len(critical), 'serious error')}")
     elif flags or result.needs_review:
-        state_badge = badge("warn", "Needs a human check")
+        state_badge = badge("warn", "Needs review")
     else:
         state_badge = badge("ok", "In good order")
 
     header(f"Booklet {pid}", f'{TRUTH[pid]["fields"]["investor_name"]}', "")
     st.html(f'<div style="margin:-6px 0 12px">{state_badge}</div>'
             f'<div class="flow" aria-label="How the review works">'
-            f'<span><b>1</b> Claude reads the booklet ({result.latency_s:.0f}s)</span>'
-            f'<span><b>2</b> Code checks every quote and the fund rules</span>'
-            f'<span><b>3</b> You decide</span></div>')
+            f'<span><b>1</b> AI reads the booklet ({result.latency_s:.0f} seconds)</span>'
+            f'<span><b>2</b> Fixed rules check it against the fund terms</span>'
+            f'<span><b>3</b> The reviewer decides</span></div>')
 
     ev = {}
     for e in result.evidence:
         ev.setdefault(e["field"], []).append(e)
-    flag_pages = [e["page"] for fl in flags for fd in fl.fields for e in ev.get(fd, [])]
+    flag_pages = [e["page"] for fl in flags for e in flag_evidence(fl, ev)]
     page_key = f"page-{pid}"
     if page_key not in st.session_state:
         st.session_state[page_key] = flag_pages[0] if flag_pages else 1
 
     left, right = st.columns([1.05, 1], gap="large")
     with right:
-        st.html('<div class="h3">Findings</div>')
+        st.html('<div class="h3">What the check found</div>')
         if not flags:
-            st.html('<div class="big-ok"><b>In good order.</b> No rule fired, and every field is backed by '
-                    'a quote found on the page. This booklet would skip the reviewer\'s queue.</div>')
+            st.html('<div class="big-ok"><b>In good order.</b> No rule found a problem, and every value the AI read '
+                    'is backed by a quote found on the page. This booklet would not need a reviewer.</div>')
         for fl in flags:
             kind = "crit" if fl.severity == CRITICAL else "warn"
-            quotes = [e for fd in fl.fields for e in ev.get(fd, [])][:2]
-            qhtml = "".join(f'<div class="quote">p.{e["page"]}: "{e["quote"]}"</div><br>' for e in quotes)
-            st.html(f'<div class="finding {kind}">{badge(kind, "Critical" if kind == "crit" else "Warning")}'
+            quotes = flag_evidence(fl, ev)[:2]
+            qhtml = "".join(f'<div class="quote">p.{e["page"]}: ' + (f'left blank under "{e["quote"]}"' if e.get("blank") else f'"{e["quote"]}"') + '</div><br>' for e in quotes)
+            st.html(f'<div class="finding {kind}">{badge(kind, "Serious" if kind == "crit" else "Minor")}'
                     f'<div class="t">{FLAG_TITLES.get(fl.code, fl.code)}</div>'
                     f'<div class="m">{fl.message}</div>{qhtml}</div>')
             if quotes:
                 st.button(f"Show on page {quotes[0]['page']}", key=f"show-{pid}-{fl.code}",
                           icon=":material/visibility:",
                           on_click=lambda p=quotes[0]["page"]: st.session_state.update({page_key: p}))
-        if result.needs_review:
-            st.html('<div class="finding warn">' + badge("warn", "Check") +
-                    '<div class="t">The model was unsure about</div><div class="m">'
-                    + ", ".join(LABELS.get(n, n) for n in result.needs_review) + '</div></div>')
+        flagged_fields = {fd for fl in flags for fd in fl.fields}
+        unsure = [n for n in result.needs_review if n not in flagged_fields]
+        if unsure:
+            st.html('<div class="finding warn">' + badge("warn", "Needs review") +
+                    '<div class="t">The AI was unsure about</div><div class="m">'
+                    + ", ".join(LABELS.get(n, n) for n in unsure) + '</div></div>')
         if pid == "SUB-018" and flags:
-            note("The hardest planted defect: US$1,500,000 in figures against \"One Million Fifty Thousand\" "
-                 "in words. The model reads both independently and code compares them. A reviewer skimming "
-                 "the page sees two plausible numbers.")
+            note("The hardest error in the test: US$1,500,000 in figures, but \"One Million Fifty Thousand\" in "
+                 "words. The AI reads both separately and a fixed rule compares them. A reviewer skimming the "
+                 "page sees two numbers that both look reasonable.")
         else:
-            note("AI reads, code decides, a human approves. The model never says pass or fail: every flag "
-                 "comes from a plain rule, so it can be explained to the investor or an auditor.")
+            note("The AI reads, fixed rules decide, and a person approves. The AI never decides pass or fail "
+                 "itself: every problem comes from a written rule, so it can be explained to the investor or "
+                 "an auditor.")
 
-        st.html('<div class="h3">Your decision</div>')
+        st.html('<div class="h3">Reviewer decision</div>')
         d1, d2 = st.columns(2)
         approved = d1.button("Approve", type="primary", icon=":material/check:", key=f"approve-{pid}",
                              disabled=bool(critical), use_container_width=True,
-                             help="Disabled while a critical issue remains.")
+                             help="Not available while a serious error remains.")
         returned = d2.button("Return to investor", icon=":material/undo:", key=f"return-{pid}",
                              use_container_width=True)
         trail = st.session_state.trail.setdefault(pid, [])
         if approved:
             log_decision(pid, "approved", flags, edits)
-            trail.append(f"{time.strftime('%H:%M')} Reviewer approved" + (f" after {len(edits)} correction(s)" if edits else ""))
-            st.toast("Approved and logged.", icon=":material/check:")
+            trail.append(f"{time.strftime('%H:%M')} Reviewer approved" + (f" after {plural(len(edits), 'correction')}" if edits else ""))
+            st.toast("Approved and recorded.", icon=":material/check:")
         if returned:
             log_decision(pid, "returned", flags, edits)
             trail.append(f"{time.strftime('%H:%M')} Reviewer returned the booklet to the investor")
         if returned or st.session_state.get(f"draft-{pid}"):
             st.session_state[f"draft-{pid}"] = True
             items = "\n".join(f"- {FLAG_TITLES.get(f.code, f.code)}: {f.message}" for f in flags) or \
-                    "- Please confirm the fields marked for review."
-            st.text_area("Draft note to the investor (edit before sending)", height=150, key=f"note-{pid}",
+                    "- Please confirm the values marked for review."
+            st.text_area("Draft message to the investor (edit before sending)", height=150, key=f"note-{pid}",
                          value=f"Thank you for your subscription. Before we can accept it into {FUND_NAME}, "
                                f"please correct the following:\n{items}")
 
-        with st.expander("All extracted fields (edit to correct the model)"):
+        with st.expander("All values the AI read (edit to correct)"):
             rows = [{"Field": LABELS[f], "Value": show(f, result.fields.get(f)),
                      "Page": str(ev[f][0]["page"]) if f in ev else "",
                      "Evidence": ev[f][0]["quote"] if f in ev else ""} for f in FIELD_NAMES]
             st.data_editor(rows, key=ekey, hide_index=True, use_container_width=True,
                            disabled=["Field", "Page", "Evidence"],
                            column_config={"Value": st.column_config.TextColumn(
-                               help="Edit a value; the checks re-run immediately.")})
+                               help="Change a value and the checks run again straight away.")})
             if edits:
-                st.caption(f"{len(edits)} correction(s). Corrections are logged and become new eval cases.")
+                st.caption(f"{plural(len(edits), 'correction')}. Corrections are logged and added to the next test set.")
 
         with st.expander("Audit trail"):
             grounded = sum(1 for f in FIELD_NAMES if result.grounded.get(f))
-            base = [f"Claude read the booklet: {result.model}, {result.latency_s:.1f}s, "
-                    f"{result.input_tokens:,} input / {result.output_tokens:,} output tokens, ${result.cost_usd:.3f}",
-                    f"Grounding: {grounded} field quotes found on the cited page",
-                    f"Rules: {len(critical)} critical, {len(flags) - len(critical)} warning"]
+            base = [f"AI read the booklet: {result.model}, {result.latency_s:.1f} seconds, "
+                    f"estimated cost ${result.cost_usd:.3f}",
+                    f"Evidence check: {grounded} values backed by a quote found on the cited page",
+                    f"Rules: {plural(len(critical), 'serious error')}, {plural(len(flags) - len(critical), 'minor issue')}"]
             st.html('<ul class="trail">' + "".join(f"<li>{t}</li>" for t in base + trail) + "</ul>")
         if not DEMO_MODE:
-            if st.button("Re-run with Claude now", icon=":material/refresh:", key=f"rerun-{pid}"):
+            if st.button("Run the AI again now", icon=":material/refresh:", key=f"rerun-{pid}"):
                 try:
                     st.session_state[f"result-{pid}"], _ = cache.cached_extract(PACKETS / f"{pid}.pdf", refresh=True)
                     st.rerun()
@@ -466,17 +502,16 @@ def step_review():
                                        format_func=lambda n: f"Page {n}") or 1
         marks = []
         for fl in flags:
-            for fd in fl.fields:
-                for e in ev.get(fd, []):
-                    if e["page"] == page_no:
-                        marks.append((e["quote"], "critical" if fl.severity == CRITICAL else "warning"))
+            for e in flag_evidence(fl, ev):
+                if e["page"] == page_no:
+                    marks.append((e["quote"], "critical" if fl.severity == CRITICAL else "warning"))
         if not flags:
             marks = [(e["quote"], "ok") for es in ev.values() for e in es if e["page"] == page_no]
         img, found = page_image(pid, page_no - 1, tuple(marks))
         st.image(img, use_container_width=True)
         if marks:
-            st.caption(f"Highlighted on this page: {found} quote(s) the findings rely on."
-                       if flags else f"Highlighted: {found} quote(s) the model used as evidence.")
+            st.caption(f"Highlighted: {plural(found, 'passage')} on this page behind the problems listed."
+                       if flags else f"Highlighted: {plural(found, 'passage')} the AI read on this page.")
 
     nav("queue", "trust")
 
@@ -494,86 +529,102 @@ def log_decision(pid, decision, flags, edits):
 # ---------- step 4: trust ----------
 
 def step_trust():
-    header("Evidence before shipping", "Can we trust it? The bar was set before testing.",
-           "Twenty booklets with known answers, eleven of them with planted defects. "
-           "The pre-check only ships as auto-clear if it passes the gate.")
+    header("Testing before launch", "How accurate is it? The pass mark was set before testing.",
+           "I tested the AI on 20 booklets where the right answer is known: 9 in good order and 11 with "
+           "errors planted on purpose. It can clear booklets without a reviewer only if it passes the test.")
     v1, v2 = load_eval("v1-baseline.json"), load_eval("v2-na-fields.json")
     s = (v2 or load_eval("latest.json") or {}).get("summary")
     if not s:
-        st.info("No eval run yet. Run `python -m evals.run_evals`.")
+        st.info("No test results yet. Run `python -m evals.run_evals`.")
         return
-    gate = badge("ok", "PASS") if s["ship"] else badge("crit", "FAIL")
-    st.html(f'<div class="card"><p><b>Ship gate</b> {gate}</p>'
-            '<p class="muted">Catch 100% of critical defects (a missed one means a bad subscription is accepted) '
-            'and get at least 95% of fields right. Otherwise it stays a pre-fill assistant.</p></div>')
+    result = badge("ok", "Passed") if s["ship"] else badge("crit", "Failed")
+    st.html(f'<div class="card"><p><b>Go-live test</b> {result}</p>'
+            '<p class="muted">Two conditions, both required: (1) find every serious error, because one missed '
+            'error means accepting a subscription the fund should reject; (2) read at least 95% of values '
+            'correctly. If it fails, the AI only pre-fills values and a person still reviews every booklet.</p></div>')
     st.write("")
     c = st.columns(4)
     for col, (num, lbl) in zip(c, [
-        (f"{s['critical_caught']}/{s['critical_planted']}", "critical defects caught"),
-        (f"{s['field_accuracy']:.0%}", "of fields extracted correctly"),
-        (f"{s['clean_auto_cleared']}/{s['clean_packets']}", "clean booklets cleared with no human touch"),
-        (f"${s['avg_cost_usd']:.2f} / {s['avg_latency_s']:.0f}s", "per booklet, list-price estimate"),
+        (f"{s['critical_caught']} of {s['critical_planted']}", "serious errors found"),
+        (f"{s['field_accuracy']:.0%}", "of values read correctly"),
+        (f"{s['clean_auto_cleared']} of {s['clean_packets']}", "good booklets cleared with no reviewer"),
+        (f"${s['avg_cost_usd']:.2f}", f"estimated AI cost per booklet, {s['avg_latency_s']:.0f} seconds each"),
     ]):
         col.html(f'<div class="card kpi"><div class="num">{num}</div><div class="lbl">{lbl}</div></div>')
 
-    st.html('<div class="h3" style="margin-top:22px">One iteration, measured</div>')
+    st.html('<div class="h3" style="margin-top:22px">What changed between version 1 and version 2</div>')
     if v1 and v2:
         a, b = v1["summary"], v2["summary"]
-        st.html(f'<div class="card"><p><b>v1</b>: {a["clean_auto_cleared"]}/{a["clean_packets"]} clean booklets cleared. '
-                'The model marked fields that do not apply (a signatory title for an individual) as "unsure", '
-                'so clean booklets went to a human.</p>'
-                f'<p><b>v2</b>: one sentence added to the prompt. {b["clean_auto_cleared"]}/{b["clean_packets"]} cleared, '
-                f'still {b["critical_caught"]}/{b["critical_planted"]} defects caught.</p></div>')
+        st.html(f'<div class="card"><p><b>Version 1:</b> {a["clean_auto_cleared"]} of {a["clean_packets"]} good '
+                'booklets cleared. The AI marked fields that do not apply, such as a signatory title for an '
+                'individual investor, as "unsure", so two good booklets went to a reviewer for no reason.</p>'
+                '<p><b>Version 2:</b> one sentence added to the AI\'s instructions. '
+                f'{b["clean_auto_cleared"]} of {b["clean_packets"]} good booklets cleared, and still '
+                f'{b["critical_caught"]} of {b["critical_planted"]} serious errors found.</p></div>')
     st.write("")
     c = st.columns(3)
-    c[0].html('<div class="card"><p><b>The model\'s doubt is a signal</b></p><p class="muted">In v2, every booklet '
-              'it marked as unsure really had a defect.</p></div>')
-    c[1].html('<div class="card"><p><b>It found a rule I had missed</b></p><p class="muted">In v1 it doubted a joint '
-              'account signed by one holder. That becomes a rule, not something left to the model.</p></div>')
-    c[2].html('<div class="card"><p><b>Why 100% is not the headline</b></p><p class="muted">Twenty clean, digital '
-              'booklets are an easy test. Scans, handwriting and side letters come next, from real NIGO cases.</p></div>')
-    note("The point of this step is the habit, not the score: decide the kill criterion first, measure, "
-         "change one thing, measure again, and say plainly what the test does not cover.")
+    c[0].html('<div class="card"><p><b>When the AI is unsure, it is worth listening</b></p><p class="muted">In '
+              'version 2, every booklet the AI was unsure about really had an error.</p></div>')
+    c[1].html('<div class="card"><p><b>It found a check I had not written</b></p><p class="muted">In version 1 it '
+              'questioned a joint account signed by only one holder. That becomes a fixed rule rather than '
+              'something left to the AI.</p></div>')
+    c[2].html('<div class="card"><p><b>Why 100% is not the headline</b></p><p class="muted">Twenty clean, typed '
+              'booklets are an easy test. Scanned and handwritten booklets and side letters come next, using '
+              'real NIGO cases.</p></div>')
+    note("What matters here is the method, not the score: set the pass mark first, test, change one thing, "
+         "test again, and say plainly what the test does not cover.")
     nav("review", "impact")
 
 
 # ---------- step 5: impact ----------
 
 def step_impact():
-    header("Business case", "What is it worth?",
-           "North star: the share of subscriptions in good order at first review. "
-           "The calculator below shows how review time moves; every input is an assumption to replace in discovery.")
+    header("Business case", "What does it save?",
+           "Main success measure: days from receiving a booklet to a decision (accept or return). "
+           "The calculator shows how reviewer time changes. Every input is an assumption to replace with "
+           "real numbers from customers.")
     left, right = st.columns([1, 1.2], gap="large")
     with left:
-        st.html('<div class="h3">Your assumptions</div>')
-        n = st.number_input("Booklets in a close", 50, 20000, 1000, step=50,
-                            help="A large close can mean over 1,000 subscription agreements (Cadwalader, 2024).")
+        st.html('<div class="h3">Assumptions</div>')
+        n = st.number_input("Booklets in one close", 50, 20000, 1000, step=50,
+                            help="A large close can involve over 1,000 subscription agreements (Cadwalader, 2024).")
         manual = st.slider("Minutes to review one booklet by hand", 5, 90, 30)
-        share = st.slider("Share that still needs a human", 5, 100, 35, format="%d%%",
-                          help="Vendors estimate 20-60% of documents arrive not in good order; no independent benchmark exists.")
-        exc = st.slider("Minutes per exception with findings and evidence ready", 1, 60, 10)
+        share = st.slider("Share of booklets with a problem (sent to a reviewer)", 5, 100, 35, format="%d%%",
+                          help="Vendors estimate that 20-60% of documents arrive not in good order. "
+                               "There is no independent benchmark.")
+        exc = st.slider("Minutes to handle a flagged booklet (problem and page already shown)", 1, 60, 10)
+        spot = st.slider("Minutes to spot-check a booklet in good order", 0, 10, 2)
+    m = (load_eval("v2-na-fields.json") or {}).get("summary", {})
+    unit_cost = m.get("avg_cost_usd", 0.09)
+    secs = m.get("avg_latency_s", 12)
+    flagged = n * share / 100
     before = n * manual / 60
-    after = n * share / 100 * exc / 60
+    after = (flagged * exc + (n - flagged) * spot) / 60
     saved = before - after
-    ai_cost = n * 0.09
+    ai_cost = n * unit_cost
     with right:
-        st.html('<div class="h3">Review time for this close</div>')
+        st.html('<div class="h3">Reviewer time for this close</div>')
         c = st.columns(2)
-        c[0].html(f'<div class="card kpi"><div class="num">{before:,.0f} h</div><div class="lbl">reading every booklet by hand</div></div>')
-        c[1].html(f'<div class="card kpi"><div class="num" style="color:var(--ok)">{after:,.0f} h</div><div class="lbl">reviewing only the exceptions</div></div>')
+        c[0].html(f'<div class="card kpi"><div class="num">{before:,.0f} h</div><div class="lbl">today: every '
+                  'booklet reviewed by hand</div></div>')
+        c[1].html(f'<div class="card kpi"><div class="num" style="color:var(--ok)">{after:,.0f} h</div>'
+                  '<div class="lbl">with the pre-check: flagged booklets plus spot checks</div></div>')
         st.write("")
         c = st.columns(2)
-        c[0].html(f'<div class="card kpi"><div class="num">{saved:,.0f} h</div><div class="lbl">saved ({(saved / before if before else 0):.0%})</div></div>')
-        c[1].html(f'<div class="card kpi"><div class="num">${ai_cost:,.0f}</div><div class="lbl">model cost at the measured ~$0.09 per booklet</div></div>')
-    note("Illustrative only. The inputs are assumptions; the measured parts are speed (~12s) and cost (~$0.09) "
-         "per booklet. In discovery I would replace each slider with numbers from three fund admins during a close.")
-    st.html('<div class="h3">What I would track</div>')
+        c[0].html(f'<div class="card kpi"><div class="num">{saved:,.0f} h</div><div class="lbl">saved '
+                  f'({(saved / before if before else 0):.0%} of today\'s time)</div></div>')
+        c[1].html(f'<div class="card kpi"><div class="num">${ai_cost:,.0f}</div><div class="lbl">estimated AI '
+                  f'cost, at about ${unit_cost:.2f} per booklet</div></div>')
+    note(f"This is an illustration, not a forecast. Only the AI's speed (about {secs:.0f} seconds) and cost "
+         f"(about ${unit_cost:.2f}) per booklet were measured. In discovery I would replace each assumption with numbers from three fund "
+         "administrators during a real close.")
+    st.html('<div class="h3">What I would measure after launch</div>')
     c = st.columns(4)
     for col, (t, d) in zip(c, [
-        ("Customer outcome", "Days from first submission to acceptance; LP drop-off"),
-        ("Ops efficiency", "Reviewer minutes per booklet; share auto-cleared"),
-        ("Safety", "Critical defects missed in production spot audits (target 0)"),
-        ("Anduin", "Attach to Fund Subscription and Data Extraction; win rate; offline LPs moved online"),
+        ("For investors and GPs", "Days from receiving a booklet to a decision; investors who drop out"),
+        ("For reviewers", "Minutes per booklet; share of booklets cleared without review"),
+        ("For risk", "Serious errors missed, checked by regular sample audits (target: zero)"),
+        ("For Anduin", "Uptake with Fund Subscription and Data Extraction customers; deals won"),
     ]):
         col.html(f'<div class="card"><p><b>{t}</b></p><p class="muted">{d}</p></div>')
     nav("trust", "next")
@@ -582,29 +633,38 @@ def step_impact():
 # ---------- step 6: why Anduin, what's next ----------
 
 def step_next():
-    header("Fit and plan", "Why Anduin, and what I would do next")
+    header("Fit and plan", "Why this fits Anduin, and what I would do next")
     c = st.columns(3)
     for col, (t, d) in zip(c, [
-        ("On the roadmap", "Review Agent is on Anduin's 2026 timeline; GP Con 2026 panels asked for exception-based review."),
-        ("Reuses what exists", "Instant Extraction's confidence flags and the rules already encoded in each fund's adaptive form: one rule set for online and offline."),
-        ("Ahead of parity", "Juniper Square, Carta and Allvue ship AI extraction. Deciding \"in good order, with evidence\" is the step after."),
+        ("It is on Anduin's roadmap", "A Review Agent is on Anduin's 2026 timeline, and fund operations panels "
+                                      "at GP Con 2026 asked for exception-based review."),
+        ("It builds on what Anduin has", "Instant Extraction already flags values it is unsure of, and each fund's "
+                                         "online form already holds its rules. The same rules can check online and "
+                                         "PDF booklets."),
+        ("It goes a step beyond competitors", "Juniper Square already uses AI to pull data from offline "
+                                              "subscriptions. Pulling data out is becoming standard; deciding whether "
+                                              "a booklet is in good order, with evidence, is the next step."),
     ]):
         col.html(f'<div class="card"><p><b>{t}</b></p><p class="muted">{d}</p></div>')
     st.html('<div class="h3" style="margin-top:22px">Plan</div>')
     c = st.columns(3)
     for col, (t, d) in zip(c, [
-        ("Weeks 1-2: discovery", "Sit with three fund admins during a close. Measure minutes per booklet, NIGO rate and the top five defect types."),
-        ("Weeks 3-8: pilot", "Offline booklets after Instant Extraction, assist mode only. Track critical misses, reviewer minutes and overrides."),
-        ("Then: move upstream", "Run the same checks when the LP submits, so issues are fixed before they reach the admin."),
+        ("Weeks 1-2: learn", "Sit with three fund administrators during a close. Measure minutes per booklet, "
+                             "the NIGO rate and the five most common errors."),
+        ("Weeks 3-8: pilot", "Run on PDF booklets after Instant Extraction, with a reviewer still approving every "
+                             "one. Track missed errors, reviewer minutes and how often reviewers disagree with the AI."),
+        ("Next: check at submission", "Run the same checks when the investor submits, so errors are fixed before "
+                                      "the booklet reaches the administrator. That is where NIGO back-and-forth "
+                                      "actually stops."),
     ]):
         col.html(f'<div class="card"><p><b>{t}</b></p><p class="muted">{d}</p></div>')
-    note("Cut for now: scanned and handwritten pages, side letters, e-signature validation, a UI for fund terms. "
-         "Next rule to add: every holder of a joint account must sign.")
+    note("Left out on purpose: scanned and handwritten pages, side letters, e-signature validation, and a screen "
+         "for editing fund terms. Next rule to add: every holder of a joint account must sign.")
     b = st.columns([1, 1, 1])
     b[0].link_button("Read the full case (MEMO.md)", MEMO_URL, icon=":material/description:", use_container_width=True)
     b[1].link_button("See the code", CODE_URL, icon=":material/code:", use_container_width=True)
-    b[2].button("Start the story again", icon=":material/replay:", on_click=go, args=("problem",), use_container_width=True)
-    st.html('<p class="foot">Prototype by Dinh H.N. Thong. All funds, investors and booklets are synthetic.</p>')
+    b[2].button("Start again", icon=":material/replay:", on_click=go, args=("problem",), use_container_width=True)
+    st.html('<p class="foot">Prototype by Dinh H.N. Thong. All funds, investors and booklets are invented.</p>')
 
 
 # ---------- layout ----------
@@ -612,14 +672,14 @@ def step_next():
 init_state()
 with st.sidebar:
     st.markdown("### Subscription Reviewer")
-    st.caption(f"AI pre-check for offline subscription booklets  \n{FUND_NAME} (synthetic), "
-               f"minimum ${MINIMUM_COMMITMENT_USD:,.0f}")
+    st.caption(f"AI pre-check for subscription booklets sent as PDF  \nExample fund: {FUND_NAME} (invented), "
+               f"minimum commitment ${MINIMUM_COMMITMENT_USD:,.0f}")
     for i, (key, label) in enumerate(STEPS, 1):
         st.button(f"{i}. {label}", key=f"nav-{key}", on_click=go, args=(key,), use_container_width=True,
                   type="primary" if key == st.session_state.step else "secondary")
     if DEMO_MODE:
-        st.caption("Public demo: shows Claude's recorded results from the eval run. Live model calls are off.")
-    st.markdown(f"[Product case]({MEMO_URL}) · [Code]({CODE_URL})")
+        st.caption("Public demo: shows the AI's saved results from testing. Live AI calls are switched off.")
+    st.markdown(f"[Full product case]({MEMO_URL}) · [Code]({CODE_URL})")
 
 if st.session_state.get("last_step") != st.session_state.step:
     # New step: start at the top of the page, not where the previous step was scrolled to.

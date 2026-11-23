@@ -80,7 +80,12 @@ assistant that pre-fills fields for a human.
 
 ## 5. What is the business impact?
 
-**North-star metric:** share of subscriptions in good order at first review (first-time-right rate).
+**Main success measure:** days from receiving a booklet to a decision (accept or return). This is what
+the review layer changes directly.
+
+The share of booklets in good order at first submission (first-time-right rate) becomes the main measure
+only in the next phase, when the same checks run as the investor submits (section 7). A review layer
+alone finds errors faster; it does not stop investors from making them.
 
 | Level | Metric | Why |
 |---|---|---|
@@ -90,12 +95,13 @@ assistant that pre-fills fields for a human.
 | Anduin | Attach rate to Fund Subscription and Data Extraction; win rate vs competitors; offline investors moved online | Revenue and defensibility |
 
 **Impact model (to fill with customer data in discovery):**
-`hours saved = booklets x (manual minutes - exception rate x exception minutes) / 60`
+`reviewer hours = booklets x (flagged share x minutes per flagged booklet
+                 + (1 - flagged share) x minutes per spot check) / 60`
 
 *Illustrative only.* A big close can mean "over 1000 subscription agreements" to review in a few days [19].
-If manual review took 30 minutes, 1,000 booklets cost 500 hours. If 70% auto-clear and exceptions take
-10 minutes, review drops to about 50 hours. The 30 minutes, 70% and 10 minutes are assumptions to measure,
-not findings.
+If manual review took 30 minutes, 1,000 booklets cost 500 hours. If 35% are flagged and take 10 minutes
+each, and the rest get a 2-minute spot check, review drops to about 80 hours. The 30 minutes, 35%,
+10 minutes and 2 minutes are assumptions to measure, not findings. The demo has a calculator for this.
 
 ## 6. What I built, and what the evals say
 
