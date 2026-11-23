@@ -1,0 +1,886 @@
+{
+  "summary": {
+    "model": "claude-opus-5-5",
+    "backend": "claude-code",
+    "effort": "medium",
+    "packets": 20,
+    "errors": 0,
+    "field_accuracy": 1.0,
+    "critical_recall": 1.0,
+    "critical_planted": 12,
+    "critical_caught": 12,
+    "flag_precision": 1.0,
+    "false_flags": [],
+    "missed_flags": [],
+    "grounding_rate": 1.0,
+    "packets_sent_to_review": 11,
+    "clean_packets": 9,
+    "clean_auto_cleared": 7,
+    "avg_cost_usd": 0.09133354,
+    "avg_latency_s": 11.329622312518769,
+    "ship": true
+  },
+  "rows": [
+    {
+      "id": "SUB-001",
+      "fields": {
+        "investor_name": "Margaret L. Hollis",
+        "investor_type": "individual",
+        "commitment_amount_figures": 500000.0,
+        "commitment_amount_words": "Five Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 500000.0,
+        "us_person": true,
+        "accreditation_basis": "income",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Margaret L. Hollis",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.09086620000000001,
+      "latency_s": 10.657206875039265,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-002",
+      "fields": {
+        "investor_name": "Cedar Ridge Holdings LLC",
+        "investor_type": "llc",
+        "commitment_amount_figures": 1000000.0,
+        "commitment_amount_words": "One Million U.S. Dollars",
+        "commitment_amount_words_value": 1000000.0,
+        "us_person": true,
+        "accreditation_basis": "entity_assets",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Daniel Okafor",
+        "signatory_title": "Managing Member",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 12,
+      "filled": 12,
+      "cost_usd": 0.0881818,
+      "latency_s": 10.020383334020153,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-003",
+      "fields": {
+        "investor_name": "The Albright Family Trust",
+        "investor_type": "trust",
+        "commitment_amount_figures": 750000.0,
+        "commitment_amount_words": "Seven Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 750000.0,
+        "us_person": true,
+        "accreditation_basis": "entity_assets",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Susan Albright",
+        "signatory_title": "Trustee",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 12,
+      "filled": 12,
+      "cost_usd": 0.0927998,
+      "latency_s": 11.116857124958187,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-004",
+      "fields": {
+        "investor_name": "Wei Ling Tan",
+        "investor_type": "individual",
+        "commitment_amount_figures": 300000.0,
+        "commitment_amount_words": "Three Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 300000.0,
+        "us_person": false,
+        "accreditation_basis": "net_worth",
+        "tax_form": "W-8BEN",
+        "signed": true,
+        "signatory_name": "Wei Ling Tan",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 10,
+      "filled": 10,
+      "cost_usd": 0.0912504,
+      "latency_s": 10.526343083940446,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-005",
+      "fields": {
+        "investor_name": "Harrowgate Capital Ltd",
+        "investor_type": "corporation",
+        "commitment_amount_figures": 2500000.0,
+        "commitment_amount_words": "Two Million Five Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 2500000.0,
+        "us_person": false,
+        "accreditation_basis": "entity_assets",
+        "tax_form": "W-8BEN-E",
+        "signed": true,
+        "signatory_name": "James Whitcombe",
+        "signatory_title": "Director",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.0884692,
+      "latency_s": 9.755744041875005,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-006",
+      "fields": {
+        "investor_name": "Robert and Elena Marsh",
+        "investor_type": "joint",
+        "commitment_amount_figures": 400000.0,
+        "commitment_amount_words": "Four Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 400000.0,
+        "us_person": true,
+        "accreditation_basis": "net_worth",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Robert Marsh",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [
+        "signatory_title",
+        "signed"
+      ],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.0919858,
+      "latency_s": 11.326527249999344,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-007",
+      "fields": {
+        "investor_name": "Equity Trust Co. FBO Priya Raman IRA",
+        "investor_type": "ira",
+        "commitment_amount_figures": 250000.0,
+        "commitment_amount_words": "Two Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 250000.0,
+        "us_person": true,
+        "accreditation_basis": "net_worth",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Priya Raman",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [
+        "signatory_title"
+      ],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.0906454,
+      "latency_s": 10.751544624799863,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-008",
+      "fields": {
+        "investor_name": "Bluestem Ventures LP",
+        "investor_type": "partnership",
+        "commitment_amount_figures": 5000000.0,
+        "commitment_amount_words": "Five Million U.S. Dollars",
+        "commitment_amount_words_value": 5000000.0,
+        "us_person": true,
+        "accreditation_basis": "all_owners_accredited",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Carla Mendes",
+        "signatory_title": "General Partner",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 12,
+      "filled": 12,
+      "cost_usd": 0.0924142,
+      "latency_s": 11.001027124933898,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-009",
+      "fields": {
+        "investor_name": "Thomas J. Reyes",
+        "investor_type": "individual",
+        "commitment_amount_figures": 600000.0,
+        "commitment_amount_words": "Six Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 600000.0,
+        "us_person": true,
+        "accreditation_basis": "income",
+        "tax_form": "W-9",
+        "signed": false,
+        "signatory_name": null,
+        "signatory_title": null,
+        "signature_date": null
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "MISSING_SIGNATURE"
+      ],
+      "expected_flags": [
+        "MISSING_SIGNATURE"
+      ],
+      "needs_review": [
+        "signatory_name",
+        "signatory_title",
+        "signature_date",
+        "signed"
+      ],
+      "grounded": 8,
+      "filled": 8,
+      "cost_usd": 0.0885744,
+      "latency_s": 11.013593500014395,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-010",
+      "fields": {
+        "investor_name": "Angela Kowalski",
+        "investor_type": "individual",
+        "commitment_amount_figures": 200000.0,
+        "commitment_amount_words": "Two Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 200000.0,
+        "us_person": true,
+        "accreditation_basis": "net_worth",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Angela Kowalski",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "BELOW_MINIMUM"
+      ],
+      "expected_flags": [
+        "BELOW_MINIMUM"
+      ],
+      "needs_review": [],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.0899698,
+      "latency_s": 11.642468916950747,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-011",
+      "fields": {
+        "investor_name": "Northbank Family Office LLC",
+        "investor_type": "llc",
+        "commitment_amount_figures": 600000.0,
+        "commitment_amount_words": "Six Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 650000.0,
+        "us_person": true,
+        "accreditation_basis": "entity_assets",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Helen Park",
+        "signatory_title": "Chief Investment Officer",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "AMOUNT_MISMATCH"
+      ],
+      "expected_flags": [
+        "AMOUNT_MISMATCH"
+      ],
+      "needs_review": [
+        "commitment_amount_figures",
+        "commitment_amount_words_value"
+      ],
+      "grounded": 12,
+      "filled": 12,
+      "cost_usd": 0.09003820000000001,
+      "latency_s": 10.549229457974434,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-012",
+      "fields": {
+        "investor_name": "Lucas Ferreira",
+        "investor_type": "individual",
+        "commitment_amount_figures": 450000.0,
+        "commitment_amount_words": "Four Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 450000.0,
+        "us_person": false,
+        "accreditation_basis": "income",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Lucas Ferreira",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "TAX_FORM_MISMATCH"
+      ],
+      "expected_flags": [
+        "TAX_FORM_MISMATCH"
+      ],
+      "needs_review": [
+        "signatory_title"
+      ],
+      "grounded": 10,
+      "filled": 10,
+      "cost_usd": 0.09724780000000001,
+      "latency_s": 13.232326125027612,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-013",
+      "fields": {
+        "investor_name": "Granite Peak Partners LLC",
+        "investor_type": "llc",
+        "commitment_amount_figures": 1200000.0,
+        "commitment_amount_words": "One Million Two Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 1200000.0,
+        "us_person": true,
+        "accreditation_basis": "entity_assets",
+        "tax_form": "W-8BEN-E",
+        "signed": true,
+        "signatory_name": "Mark Ellison",
+        "signatory_title": "Manager",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "TAX_FORM_MISMATCH"
+      ],
+      "expected_flags": [
+        "TAX_FORM_MISMATCH"
+      ],
+      "needs_review": [
+        "tax_form",
+        "us_person"
+      ],
+      "grounded": 12,
+      "filled": 12,
+      "cost_usd": 0.0970274,
+      "latency_s": 12.891774124931544,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-014",
+      "fields": {
+        "investor_name": "The Nakamura Revocable Trust",
+        "investor_type": "trust",
+        "commitment_amount_figures": 800000.0,
+        "commitment_amount_words": "Eight Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 800000.0,
+        "us_person": true,
+        "accreditation_basis": null,
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Kenji Nakamura",
+        "signatory_title": "Trustee",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "NO_ACCREDITATION"
+      ],
+      "expected_flags": [
+        "NO_ACCREDITATION"
+      ],
+      "needs_review": [
+        "accreditation_basis"
+      ],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.088546,
+      "latency_s": 10.081950457999483,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-015",
+      "fields": {
+        "investor_name": "Solano Industrial Corp.",
+        "investor_type": "corporation",
+        "commitment_amount_figures": 3000000.0,
+        "commitment_amount_words": "Three Million U.S. Dollars",
+        "commitment_amount_words_value": 3000000.0,
+        "us_person": true,
+        "accreditation_basis": "entity_assets",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Diana Solano",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "MISSING_SIGNATORY_TITLE"
+      ],
+      "expected_flags": [
+        "MISSING_SIGNATORY_TITLE"
+      ],
+      "needs_review": [
+        "signatory_title"
+      ],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.0875016,
+      "latency_s": 12.92068887501955,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-016",
+      "fields": {
+        "investor_name": "Gregory Avila",
+        "investor_type": "individual",
+        "commitment_amount_figures": 350000.0,
+        "commitment_amount_words": "Three Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 350000.0,
+        "us_person": true,
+        "accreditation_basis": "license",
+        "tax_form": "none",
+        "signed": true,
+        "signatory_name": "Gregory Avila",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "TAX_FORM_MISMATCH"
+      ],
+      "expected_flags": [
+        "TAX_FORM_MISMATCH"
+      ],
+      "needs_review": [],
+      "grounded": 11,
+      "filled": 11,
+      "cost_usd": 0.08940999999999999,
+      "latency_s": 10.79567199992016,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-017",
+      "fields": {
+        "investor_name": "Natalie Brooks",
+        "investor_type": "individual",
+        "commitment_amount_figures": 150000.0,
+        "commitment_amount_words": "One Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 150000.0,
+        "us_person": true,
+        "accreditation_basis": "income",
+        "tax_form": "W-9",
+        "signed": false,
+        "signatory_name": null,
+        "signatory_title": null,
+        "signature_date": null
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "BELOW_MINIMUM",
+        "MISSING_SIGNATURE"
+      ],
+      "expected_flags": [
+        "BELOW_MINIMUM",
+        "MISSING_SIGNATURE"
+      ],
+      "needs_review": [
+        "signatory_name",
+        "signatory_title",
+        "signature_date",
+        "signed"
+      ],
+      "grounded": 8,
+      "filled": 8,
+      "cost_usd": 0.08910219999999999,
+      "latency_s": 10.704169916920364,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-018",
+      "fields": {
+        "investor_name": "Westlake Endowment Partners LP",
+        "investor_type": "partnership",
+        "commitment_amount_figures": 1500000.0,
+        "commitment_amount_words": "One Million Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 1050000.0,
+        "us_person": true,
+        "accreditation_basis": "all_owners_accredited",
+        "tax_form": "W-9",
+        "signed": true,
+        "signatory_name": "Owen Fitzgerald",
+        "signatory_title": "General Partner",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "AMOUNT_MISMATCH"
+      ],
+      "expected_flags": [
+        "AMOUNT_MISMATCH"
+      ],
+      "needs_review": [
+        "commitment_amount_figures",
+        "commitment_amount_words_value"
+      ],
+      "grounded": 12,
+      "filled": 12,
+      "cost_usd": 0.0943938,
+      "latency_s": 13.099756208015606,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-019",
+      "fields": {
+        "investor_name": "Kestrel Holdings Pte. Ltd.",
+        "investor_type": "corporation",
+        "commitment_amount_figures": 900000.0,
+        "commitment_amount_words": "Nine Hundred Thousand U.S. Dollars",
+        "commitment_amount_words_value": 900000.0,
+        "us_person": false,
+        "accreditation_basis": null,
+        "tax_form": "W-8BEN",
+        "signed": true,
+        "signatory_name": "Arjun Mehta",
+        "signatory_title": "Director",
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [
+        "NO_ACCREDITATION",
+        "TAX_FORM_MISMATCH"
+      ],
+      "expected_flags": [
+        "NO_ACCREDITATION",
+        "TAX_FORM_MISMATCH"
+      ],
+      "needs_review": [
+        "accreditation_basis",
+        "tax_form"
+      ],
+      "grounded": 10,
+      "filled": 10,
+      "cost_usd": 0.0951694,
+      "latency_s": 12.4506185001228,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    },
+    {
+      "id": "SUB-020",
+      "fields": {
+        "investor_name": "Nguyen Thi Minh Anh",
+        "investor_type": "individual",
+        "commitment_amount_figures": 350000.0,
+        "commitment_amount_words": "Three Hundred Fifty Thousand U.S. Dollars",
+        "commitment_amount_words_value": 350000.0,
+        "us_person": false,
+        "accreditation_basis": "license",
+        "tax_form": "W-8BEN",
+        "signed": true,
+        "signatory_name": "Nguyen Thi Minh Anh",
+        "signatory_title": null,
+        "signature_date": "2026-11-14"
+      },
+      "field_hits": {
+        "investor_name": true,
+        "investor_type": true,
+        "commitment_amount_figures": true,
+        "commitment_amount_words_value": true,
+        "us_person": true,
+        "accreditation_basis": true,
+        "tax_form": true,
+        "signed": true,
+        "signatory_name": true,
+        "signatory_title": true,
+        "signature_date": true
+      },
+      "wrong_fields": {},
+      "flags": [],
+      "expected_flags": [],
+      "needs_review": [],
+      "grounded": 10,
+      "filled": 10,
+      "cost_usd": 0.0930774,
+      "latency_s": 12.054564707912505,
+      "model": "claude-opus-5-5 (via Claude Code)"
+    }
+  ]
+}

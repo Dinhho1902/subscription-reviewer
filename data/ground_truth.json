@@ -1,0 +1,346 @@
+{
+  "SUB-001": {
+    "fields": {
+      "investor_name": "Margaret L. Hollis",
+      "investor_type": "individual",
+      "commitment_amount_figures": 500000.0,
+      "commitment_amount_words_value": 500000.0,
+      "us_person": true,
+      "accreditation_basis": "income",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Margaret L. Hollis",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-002": {
+    "fields": {
+      "investor_name": "Cedar Ridge Holdings LLC",
+      "investor_type": "llc",
+      "commitment_amount_figures": 1000000.0,
+      "commitment_amount_words_value": 1000000.0,
+      "us_person": true,
+      "accreditation_basis": "entity_assets",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Daniel Okafor",
+      "signatory_title": "Managing Member",
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-003": {
+    "fields": {
+      "investor_name": "The Albright Family Trust",
+      "investor_type": "trust",
+      "commitment_amount_figures": 750000.0,
+      "commitment_amount_words_value": 750000.0,
+      "us_person": true,
+      "accreditation_basis": "entity_assets",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Susan Albright",
+      "signatory_title": "Trustee",
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-004": {
+    "fields": {
+      "investor_name": "Wei Ling Tan",
+      "investor_type": "individual",
+      "commitment_amount_figures": 300000.0,
+      "commitment_amount_words_value": 300000.0,
+      "us_person": false,
+      "accreditation_basis": "net_worth",
+      "tax_form": "W-8BEN",
+      "signed": true,
+      "signatory_name": "Wei Ling Tan",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-005": {
+    "fields": {
+      "investor_name": "Harrowgate Capital Ltd",
+      "investor_type": "corporation",
+      "commitment_amount_figures": 2500000.0,
+      "commitment_amount_words_value": 2500000.0,
+      "us_person": false,
+      "accreditation_basis": "entity_assets",
+      "tax_form": "W-8BEN-E",
+      "signed": true,
+      "signatory_name": "James Whitcombe",
+      "signatory_title": "Director",
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-006": {
+    "fields": {
+      "investor_name": "Robert and Elena Marsh",
+      "investor_type": "joint",
+      "commitment_amount_figures": 400000.0,
+      "commitment_amount_words_value": 400000.0,
+      "us_person": true,
+      "accreditation_basis": "net_worth",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Robert Marsh",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-007": {
+    "fields": {
+      "investor_name": "Equity Trust Co. FBO Priya Raman IRA",
+      "investor_type": "ira",
+      "commitment_amount_figures": 250000.0,
+      "commitment_amount_words_value": 250000.0,
+      "us_person": true,
+      "accreditation_basis": "net_worth",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Priya Raman",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-008": {
+    "fields": {
+      "investor_name": "Bluestem Ventures LP",
+      "investor_type": "partnership",
+      "commitment_amount_figures": 5000000.0,
+      "commitment_amount_words_value": 5000000.0,
+      "us_person": true,
+      "accreditation_basis": "all_owners_accredited",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Carla Mendes",
+      "signatory_title": "General Partner",
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  },
+  "SUB-009": {
+    "fields": {
+      "investor_name": "Thomas J. Reyes",
+      "investor_type": "individual",
+      "commitment_amount_figures": 600000.0,
+      "commitment_amount_words_value": 600000.0,
+      "us_person": true,
+      "accreditation_basis": "income",
+      "tax_form": "W-9",
+      "signed": false,
+      "signatory_name": null,
+      "signatory_title": null,
+      "signature_date": null
+    },
+    "flags": [
+      "MISSING_SIGNATURE"
+    ]
+  },
+  "SUB-010": {
+    "fields": {
+      "investor_name": "Angela Kowalski",
+      "investor_type": "individual",
+      "commitment_amount_figures": 200000.0,
+      "commitment_amount_words_value": 200000.0,
+      "us_person": true,
+      "accreditation_basis": "net_worth",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Angela Kowalski",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "BELOW_MINIMUM"
+    ]
+  },
+  "SUB-011": {
+    "fields": {
+      "investor_name": "Northbank Family Office LLC",
+      "investor_type": "llc",
+      "commitment_amount_figures": 600000.0,
+      "commitment_amount_words_value": 650000.0,
+      "us_person": true,
+      "accreditation_basis": "entity_assets",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Helen Park",
+      "signatory_title": "Chief Investment Officer",
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "AMOUNT_MISMATCH"
+    ]
+  },
+  "SUB-012": {
+    "fields": {
+      "investor_name": "Lucas Ferreira",
+      "investor_type": "individual",
+      "commitment_amount_figures": 450000.0,
+      "commitment_amount_words_value": 450000.0,
+      "us_person": false,
+      "accreditation_basis": "income",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Lucas Ferreira",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "TAX_FORM_MISMATCH"
+    ]
+  },
+  "SUB-013": {
+    "fields": {
+      "investor_name": "Granite Peak Partners LLC",
+      "investor_type": "llc",
+      "commitment_amount_figures": 1200000.0,
+      "commitment_amount_words_value": 1200000.0,
+      "us_person": true,
+      "accreditation_basis": "entity_assets",
+      "tax_form": "W-8BEN-E",
+      "signed": true,
+      "signatory_name": "Mark Ellison",
+      "signatory_title": "Manager",
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "TAX_FORM_MISMATCH"
+    ]
+  },
+  "SUB-014": {
+    "fields": {
+      "investor_name": "The Nakamura Revocable Trust",
+      "investor_type": "trust",
+      "commitment_amount_figures": 800000.0,
+      "commitment_amount_words_value": 800000.0,
+      "us_person": true,
+      "accreditation_basis": null,
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Kenji Nakamura",
+      "signatory_title": "Trustee",
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "NO_ACCREDITATION"
+    ]
+  },
+  "SUB-015": {
+    "fields": {
+      "investor_name": "Solano Industrial Corp.",
+      "investor_type": "corporation",
+      "commitment_amount_figures": 3000000.0,
+      "commitment_amount_words_value": 3000000.0,
+      "us_person": true,
+      "accreditation_basis": "entity_assets",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Diana Solano",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "MISSING_SIGNATORY_TITLE"
+    ]
+  },
+  "SUB-016": {
+    "fields": {
+      "investor_name": "Gregory Avila",
+      "investor_type": "individual",
+      "commitment_amount_figures": 350000.0,
+      "commitment_amount_words_value": 350000.0,
+      "us_person": true,
+      "accreditation_basis": "license",
+      "tax_form": "none",
+      "signed": true,
+      "signatory_name": "Gregory Avila",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "TAX_FORM_MISMATCH"
+    ]
+  },
+  "SUB-017": {
+    "fields": {
+      "investor_name": "Natalie Brooks",
+      "investor_type": "individual",
+      "commitment_amount_figures": 150000.0,
+      "commitment_amount_words_value": 150000.0,
+      "us_person": true,
+      "accreditation_basis": "income",
+      "tax_form": "W-9",
+      "signed": false,
+      "signatory_name": null,
+      "signatory_title": null,
+      "signature_date": null
+    },
+    "flags": [
+      "BELOW_MINIMUM",
+      "MISSING_SIGNATURE"
+    ]
+  },
+  "SUB-018": {
+    "fields": {
+      "investor_name": "Westlake Endowment Partners LP",
+      "investor_type": "partnership",
+      "commitment_amount_figures": 1500000.0,
+      "commitment_amount_words_value": 1050000.0,
+      "us_person": true,
+      "accreditation_basis": "all_owners_accredited",
+      "tax_form": "W-9",
+      "signed": true,
+      "signatory_name": "Owen Fitzgerald",
+      "signatory_title": "General Partner",
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "AMOUNT_MISMATCH"
+    ]
+  },
+  "SUB-019": {
+    "fields": {
+      "investor_name": "Kestrel Holdings Pte. Ltd.",
+      "investor_type": "corporation",
+      "commitment_amount_figures": 900000.0,
+      "commitment_amount_words_value": 900000.0,
+      "us_person": false,
+      "accreditation_basis": null,
+      "tax_form": "W-8BEN",
+      "signed": true,
+      "signatory_name": "Arjun Mehta",
+      "signatory_title": "Director",
+      "signature_date": "2026-11-14"
+    },
+    "flags": [
+      "NO_ACCREDITATION",
+      "TAX_FORM_MISMATCH"
+    ]
+  },
+  "SUB-020": {
+    "fields": {
+      "investor_name": "Nguyen Thi Minh Anh",
+      "investor_type": "individual",
+      "commitment_amount_figures": 350000.0,
+      "commitment_amount_words_value": 350000.0,
+      "us_person": false,
+      "accreditation_basis": "license",
+      "tax_form": "W-8BEN",
+      "signed": true,
+      "signatory_name": "Nguyen Thi Minh Anh",
+      "signatory_title": null,
+      "signature_date": "2026-11-14"
+    },
+    "flags": []
+  }
+}

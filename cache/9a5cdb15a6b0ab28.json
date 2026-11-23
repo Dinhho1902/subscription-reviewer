@@ -1,0 +1,164 @@
+{
+  "fields": {
+    "investor_name": "Margaret L. Hollis",
+    "investor_type": "individual",
+    "commitment_amount_figures": 500000.0,
+    "commitment_amount_words": "Five Hundred Thousand U.S. Dollars",
+    "commitment_amount_words_value": 500000.0,
+    "us_person": true,
+    "accreditation_basis": "income",
+    "tax_form": "W-9",
+    "signed": true,
+    "signatory_name": "Margaret L. Hollis",
+    "signatory_title": null,
+    "signature_date": "2026-11-14"
+  },
+  "evidence": [
+    {
+      "field": "investor_name",
+      "page": 1,
+      "quote": "Legal name of Investor: Margaret L. Hollis"
+    },
+    {
+      "field": "investor_type",
+      "page": 1,
+      "quote": "[X] Individual"
+    },
+    {
+      "field": "commitment_amount_figures",
+      "page": 1,
+      "quote": "Amount in figures: US$ 500,000.00"
+    },
+    {
+      "field": "commitment_amount_words",
+      "page": 1,
+      "quote": "Amount in words: Five Hundred Thousand U.S. Dollars"
+    },
+    {
+      "field": "commitment_amount_words_value",
+      "page": 1,
+      "quote": "Five Hundred Thousand U.S. Dollars"
+    },
+    {
+      "field": "us_person",
+      "page": 2,
+      "quote": "for U.S. federal income tax purposes? [X] Yes [ ] No"
+    },
+    {
+      "field": "accreditation_basis",
+      "page": 2,
+      "quote": "[X] Individual income above $200,000 (or $300,000 jointly)"
+    },
+    {
+      "field": "tax_form",
+      "page": 3,
+      "quote": "Enclosed form: Form W-9"
+    },
+    {
+      "field": "signed",
+      "page": 4,
+      "quote": "Signature: /s/ Margaret L. Hollis"
+    },
+    {
+      "field": "signatory_name",
+      "page": 4,
+      "quote": "Print name: Margaret L. Hollis"
+    },
+    {
+      "field": "signature_date",
+      "page": 4,
+      "quote": "Date: November 14, 2026"
+    }
+  ],
+  "grounded": {
+    "investor_name": true,
+    "investor_type": true,
+    "commitment_amount_figures": true,
+    "commitment_amount_words": true,
+    "commitment_amount_words_value": true,
+    "us_person": true,
+    "accreditation_basis": true,
+    "tax_form": true,
+    "signed": true,
+    "signatory_name": true,
+    "signature_date": true
+  },
+  "needs_review": [],
+  "input_tokens": 14242,
+  "output_tokens": 989,
+  "cost_usd": 0.0915254,
+  "latency_s": 11.185489583062008,
+  "model": "claude-opus-5-5 (via Claude Code)",
+  "raw": {
+    "investor_name": "Margaret L. Hollis",
+    "investor_type": "individual",
+    "commitment_amount_figures": 500000.0,
+    "commitment_amount_words": "Five Hundred Thousand U.S. Dollars",
+    "commitment_amount_words_value": 500000.0,
+    "us_person": true,
+    "accreditation_basis": "income",
+    "tax_form": "W-9",
+    "signed": true,
+    "signatory_name": "Margaret L. Hollis",
+    "signatory_title": null,
+    "signature_date": "2026-11-14",
+    "evidence": [
+      {
+        "field": "investor_name",
+        "page": 1,
+        "quote": "Legal name of Investor: Margaret L. Hollis"
+      },
+      {
+        "field": "investor_type",
+        "page": 1,
+        "quote": "[X] Individual"
+      },
+      {
+        "field": "commitment_amount_figures",
+        "page": 1,
+        "quote": "Amount in figures: US$ 500,000.00"
+      },
+      {
+        "field": "commitment_amount_words",
+        "page": 1,
+        "quote": "Amount in words: Five Hundred Thousand U.S. Dollars"
+      },
+      {
+        "field": "commitment_amount_words_value",
+        "page": 1,
+        "quote": "Five Hundred Thousand U.S. Dollars"
+      },
+      {
+        "field": "us_person",
+        "page": 2,
+        "quote": "for U.S. federal income tax purposes? [X] Yes [ ] No"
+      },
+      {
+        "field": "accreditation_basis",
+        "page": 2,
+        "quote": "[X] Individual income above $200,000 (or $300,000 jointly)"
+      },
+      {
+        "field": "tax_form",
+        "page": 3,
+        "quote": "Enclosed form: Form W-9"
+      },
+      {
+        "field": "signed",
+        "page": 4,
+        "quote": "Signature: /s/ Margaret L. Hollis"
+      },
+      {
+        "field": "signatory_name",
+        "page": 4,
+        "quote": "Print name: Margaret L. Hollis"
+      },
+      {
+        "field": "signature_date",
+        "page": 4,
+        "quote": "Date: November 14, 2026"
+      }
+    ],
+    "uncertain_fields": []
+  }
+}
