@@ -1,5 +1,5 @@
 """Render a PDF page with evidence quotes highlighted, so a reviewer sees exactly where each
-finding comes from."""
+finding comes from. `crop` returns a zoomed strip around specific quotes."""
 
 import re
 
@@ -28,25 +28,45 @@ def _find(textpage, quote: str):
     return None
 
 
-def render(pdf_bytes: bytes, page_index: int, marks: list[tuple[str, str]]) -> tuple[Image.Image, int]:
+def _rects(textpage, quote: str) -> list[tuple]:
+    hit = _find(textpage, quote)
+    return [textpage.get_rect(i) for i in range(textpage.count_rects(*hit))] if hit else []
+
+
+def render(pdf_bytes: bytes, page_index: int, marks: list[tuple[str, str]],
+           scale: float = SCALE) -> tuple[Image.Image, int]:
     """marks: [(quote, kind)] with kind in COLORS. Returns the image and how many marks were found."""
-    doc = pdfium.PdfDocument(pdf_bytes)
-    page = doc[page_index]
+    page = pdfium.PdfDocument(pdf_bytes)[page_index]
     _, height = page.get_size()
-    image = page.render(scale=SCALE).to_pil().convert("RGBA")
+    image = page.render(scale=scale).to_pil().convert("RGBA")
     overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     textpage = page.get_textpage()
     found = 0
     for quote, kind in marks:
-        hit = _find(textpage, quote)
-        if not hit:
+        rects = _rects(textpage, quote)
+        if not rects:
             continue
         found += 1
         outline, fill = COLORS.get(kind, COLORS["warning"])
-        for i in range(textpage.count_rects(*hit)):
-            left, bottom, right, top = textpage.get_rect(i)
-            box = [left * SCALE - 4, (height - top) * SCALE - 4,
-                   right * SCALE + 4, (height - bottom) * SCALE + 4]
+        for left, bottom, right, top in rects:
+            box = [left * scale - 4, (height - top) * scale - 4, right * scale + 4, (height - bottom) * scale + 4]
             draw.rectangle(box, fill=fill, outline=outline, width=3)
     return Image.alpha_composite(image, overlay).convert("RGB"), found
+
+
+def crop(pdf_bytes: bytes, page_index: int, quotes: list[str], kind: str = "critical",
+         pad_pt: float = 16, scale: float = 2.4) -> Image.Image | None:
+    """A zoomed strip of the page around the given quotes, with the quotes highlighted."""
+    page = pdfium.PdfDocument(pdf_bytes)[page_index]
+    width, height = page.get_size()
+    textpage = page.get_textpage()
+    rects = [r for q in quotes for r in _rects(textpage, q)]
+    if not rects:
+        return None
+    top, bottom = max(r[3] for r in rects), min(r[1] for r in rects)
+    image, _ = render(pdf_bytes, page_index, [(q, kind) for q in quotes], scale=scale)
+    left, right = min(r[0] for r in rects), max(r[2] for r in rects)
+    box = (int(max(0, left - 14) * scale), int(max(0, height - top - pad_pt) * scale),
+           int(min(width, right + 40) * scale), int(min(height, height - bottom + pad_pt) * scale))
+    return image.crop(box)

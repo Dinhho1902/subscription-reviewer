@@ -12,8 +12,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from reviewer import cache
-from reviewer.extract import FIELD_NAMES, ExtractionRefused
-from reviewer.fund_terms import FUND_NAME, MINIMUM_COMMITMENT_USD
+from reviewer.extract import FIELD_NAMES, Evidence, ExtractionRefused, ground, page_texts
+from reviewer.fund_terms import (ENTITY_TYPES, FUND_NAME, INDIVIDUAL_TYPES, MINIMUM_COMMITMENT_USD,
+                                 expected_tax_form)
+from reviewer.highlight import crop as crop_strip
 from reviewer.highlight import render as render_page
 from reviewer.rules import CRITICAL, check
 
@@ -111,7 +113,51 @@ border-radius:6px;padding:4px 8px;margin-top:6px;color:#1E293B;display:inline-bl
 div.stButton > button{min-height:44px;border-radius:10px;font-weight:600}
 @media (max-width: 640px){.hero{font-size:27px}.lead{font-size:16px}.stepper li:not(.cur){display:none}
 .qrow{flex-wrap:wrap;gap:6px 10px}.qid{width:auto}}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+/* step 2: the sorting diagram */
+.sorter{display:flex;align-items:stretch;gap:10px;margin:6px 0 8px;flex-wrap:nowrap}
+.sbox{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 14px;flex:1;min-width:0}
+.sbox.wide{flex:1.4}.sbox.ok{border-color:#86EFAC;background:#F0FDF4}.sbox.crit{border-color:#FCA5A5;background:#FEF2F2}
+.scap{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.sbox.ok .scap{color:var(--ok)}.sbox.crit .scap{color:var(--crit)}
+.docs{display:flex;flex-wrap:wrap;gap:4px}
+.doc{display:inline-block;width:18px;height:24px;border-radius:2px;opacity:0;clip-path:polygon(0 0,68% 0,100% 26%,100% 100%,0 100%);background:linear-gradient(to bottom,transparent 42%,rgba(255,255,255,.75) 42% 48%,transparent 48% 58%,rgba(255,255,255,.75) 58% 64%,transparent 64% 74%,rgba(255,255,255,.75) 74% 80%,transparent 80%) 3px 0/12px 100% no-repeat,currentColor;animation:pop .35s ease-out forwards;animation-delay:var(--d)}
+.doc.grey{color:#94A3B8}.doc.ok{color:#16A34A}.doc.crit{color:#DC2626}
+.ssub{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.45}
+.big{font-size:26px;font-weight:700;color:var(--fg);margin:2px 0}
+.sarrow{flex:0 0 34px;display:flex;align-items:center;justify-content:center;position:relative}
+.sarrow::before{content:"";height:2px;width:100%;background:var(--navy)}
+.sarrow::after{content:"";position:absolute;right:-6px;border:6px solid transparent;border-left:8px solid var(--navy)}
+.sarrow span{position:absolute;top:50%;font-size:11px;color:var(--muted);white-space:nowrap;transform:translateY(-22px)}
+.sengine{flex:0 0 170px;background:var(--navy);color:#fff;border-radius:12px;padding:14px;display:flex;flex-direction:column;justify-content:center}
+.sengine .etitle{font-weight:700;font-size:16px}.sengine .esub{font-size:13px;opacity:.92;margin-top:6px;line-height:1.45}
+.sout{display:flex;flex-direction:column;gap:10px;flex:1.3;min-width:0}
+@keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* step 3: timeline, section numbers, comparison card */
+.tl{list-style:none;display:grid;grid-template-columns:repeat(5,1fr);margin:4px 0 6px!important;padding:0!important}
+.tl-step{position:relative;padding:22px 12px 4px 0;opacity:0;animation:pop .4s ease-out forwards;animation-delay:var(--d)}
+.tl-step::before{content:"";position:absolute;top:8px;left:12px;right:0;height:2px;background:var(--border)}
+.tl-step:last-child::before{display:none}
+.tl-dot{position:absolute;top:2px;left:0;width:14px;height:14px;border-radius:50%;background:var(--navy);border:2px solid #fff;box-shadow:0 0 0 1px var(--navy)}
+.tl-step.ok .tl-dot{background:var(--ok);box-shadow:0 0 0 1px var(--ok)}.tl-step.crit .tl-dot{background:var(--crit);box-shadow:0 0 0 1px var(--crit)}
+.tl-step.warn .tl-dot{background:#D97706;box-shadow:0 0 0 1px #D97706}
+.tl-time{display:block;font-size:12px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.tl-title{display:block;font-size:15px;font-weight:600;color:var(--fg);margin-top:2px}
+.tl-step.ok .tl-title{color:var(--ok)}.tl-step.crit .tl-title{color:var(--crit)}.tl-step.warn .tl-title{color:var(--warn)}
+.tl-desc{display:block;font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+.sec{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:600;color:var(--fg);margin:14px 0 10px}
+.sec-n{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.cmp{display:flex;align-items:stretch;gap:8px;margin-top:10px;flex-wrap:wrap}
+.cmp .cell{background:var(--soft);border-radius:8px;padding:8px 12px;min-width:120px;flex:1}
+.cmp .cell span{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.cmp .cell b{display:block;font-size:17px;color:var(--fg);margin-top:2px}
+.cmp .cell small{display:block;font-size:12.5px;font-weight:400;color:var(--muted);margin-top:2px}
+.cmp .op{display:flex;align-items:center;font-size:24px;font-weight:700;color:var(--crit)}
+.muted-p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0 0 10px}
+@media (max-width: 900px){.sorter{flex-direction:column}.sarrow{flex:0 0 26px;width:26px;align-self:center;transform:rotate(90deg)}
+.sarrow span{display:none}.sengine{flex:0 0 auto}.tl{grid-template-columns:1fr}.tl-step{padding:0 0 12px 26px}
+.tl-step::before{top:16px;bottom:0;left:6px;right:auto;width:2px;height:auto}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}
+.doc,.tl-step{opacity:1!important}}
 </style>
 """)
 
@@ -124,7 +170,7 @@ def init_state():
         st.session_state.step = qp.get("step") if qp.get("step") in STEP_KEYS else "problem"
     if "pid" not in st.session_state:
         st.session_state.pid = qp.get("booklet") if qp.get("booklet") in TRUTH else "SUB-018"
-    st.session_state.setdefault("ai_view", "With AI pre-check")
+    st.session_state.setdefault("ai_view", "With the AI pre-check")
     st.session_state.setdefault("trail", {})
 
 
@@ -254,6 +300,29 @@ def page_image(pid: str, page_index: int, marks: tuple):
     return render_page(pdf_bytes(pid), page_index, list(marks))
 
 
+def docs(n: int, cls: str, start: float = 0.0, step: float = 0.06) -> str:
+    return "".join(f'<span class="doc {cls}" style="--d:{start + i * step:.2f}s"></span>' for i in range(n))
+
+
+def sorter_html(with_ai: bool, n_ok: int, n_rev: int, secs: str) -> str:
+    total = n_ok + n_rev
+    incoming = (f'<div class="sbox"><div class="scap">Booklets received</div><div class="docs">{docs(total, "grey")}</div>'
+                f'<div class="ssub">{total} booklets, {total * 4} pages</div></div>')
+    if not with_ai:
+        return (f'<div class="sorter">{incoming}<div class="sarrow"><span>every page, by hand</span></div>'
+                f'<div class="sbox wide"><div class="scap">Reviewer</div><div class="big">{total} booklets to open</div>'
+                f'<div class="ssub">{total * 4} pages to read. Clean booklets take as long as the ones with '
+                f'errors, and the errors only show up when someone reaches that page.</div></div></div>')
+    engine = (f'<div class="sengine"><div class="etitle">AI pre-check</div>'
+              f'<div class="esub">Reads every page, checks 6 fund rules, about {secs} per booklet</div></div>')
+    out = (f'<div class="sout"><div class="sbox ok"><div class="scap">In good order: {n_ok}</div>'
+           f'<div class="docs">{docs(n_ok, "ok", 0.9)}</div><div class="ssub">No reviewer time</div></div>'
+           f'<div class="sbox crit"><div class="scap">To the reviewer: {n_rev}</div>'
+           f'<div class="docs">{docs(n_rev, "crit", 1.0)}</div>'
+           f'<div class="ssub">Problem described and marked on the page</div></div></div>')
+    return f'<div class="sorter">{incoming}<div class="sarrow"></div>{engine}<div class="sarrow"></div>{out}</div>'
+
+
 # ---------- step 1: the problem ----------
 
 def step_problem():
@@ -264,6 +333,12 @@ def step_problem():
            "A booklet with an error is not in good order (NIGO) and goes back to the investor. "
            "Errors found late delay the close; an error that is missed means accepting a subscription "
            "the fund should have rejected.")
+    t1, t2, _ = st.columns([1, 1.2, 1.6])
+    t1.button("Try the product", icon=":material/play_arrow:", type="primary", use_container_width=True,
+              on_click=go, args=("review", "SUB-018"), key="try-top")
+    t2.button("Follow the story (6 steps)", icon=":material/menu_book:", use_container_width=True,
+              on_click=go, args=("queue",), key="story-top")
+    st.write("")
     k = st.columns(3)
     kpis = [
         ("74%", "of fund managers say KYC checks add 6 to 30 days to a fund close",
@@ -314,13 +389,7 @@ def step_queue():
     with_errors = sum(1 for p in TRUTH if TRUTH[p]["flags"])
 
     if view == "Without AI":
-        c = st.columns(3)
-        c[0].html('<div class="card kpi"><div class="num">20</div><div class="lbl">booklets, each read '
-                  'page by page</div></div>')
-        c[1].html('<div class="card kpi"><div class="num">4</div><div class="lbl">pages per booklet, every '
-                  'field checked by hand</div></div>')
-        c[2].html(f'<div class="card kpi"><div class="num">{with_errors}</div><div class="lbl">of the 20 have '
-                  'an error, but you only find out which ones by reading all of them</div></div>')
+        st.html(sorter_html(False, 0, len(rows), ""))
         note("Without a pre-check, a clean booklet takes as long to review as one with an error. "
              "Switch to <b>With the AI pre-check</b> to see the queue the reviewer would get instead.")
         for pid, *_ in rows:
@@ -333,13 +402,7 @@ def step_queue():
 
     s = (load_eval("v2-na-fields.json") or {}).get("summary", {})
     secs = f"{s['avg_latency_s']:.0f} seconds" if s else "seconds"
-    c = st.columns(3)
-    c[0].html(f'<div class="card kpi"><div class="num" style="color:var(--ok)">{len(cleared)}</div>'
-              '<div class="lbl">in good order, no reviewer time needed</div></div>')
-    c[1].html(f'<div class="card kpi"><div class="num" style="color:var(--crit)">{len(attention)}</div>'
-              '<div class="lbl">sent to the reviewer, each with the problem already described</div></div>')
-    c[2].html(f'<div class="card kpi"><div class="num">{secs}</div>'
-              '<div class="lbl">for the AI to read one booklet (average in testing)</div></div>')
+    st.html(sorter_html(True, len(cleared), len(attention), secs))
     note("A booklet counts as in good order only if three things hold: no rule found a problem, every value "
          "the AI read is backed by a quote found on the page, and the AI did not flag anything it was unsure "
          "of. If any one of these fails, a person reviews it.")
@@ -373,6 +436,99 @@ def queue_row(pid: str, kind: str, label: str, why: str, button: bool = True):
 
 # ---------- step 3: review one booklet ----------
 
+def who_is(fields: dict) -> str:
+    if fields.get("us_person"):
+        return "U.S. investor"
+    return "Non-U.S. individual" if fields.get("investor_type") in INDIVIDUAL_TYPES else "Non-U.S. entity"
+
+
+def proof_html(fl, fields: dict) -> str:
+    """A small side-by-side of the values the rule compared, so the reason is visible at a glance."""
+    fig, wv = fields.get("commitment_amount_figures"), fields.get("commitment_amount_words_value")
+    cells, op = [], ""
+    if fl.code == "AMOUNT_MISMATCH":
+        cells = [("In figures", f"US${fig:,.0f}"),
+                 ("In words", f"US${wv:,.0f}" + (f"<small>\"{fields['commitment_amount_words']}\"</small>"
+                                                 if fields.get("commitment_amount_words") else ""))]
+        op = "&ne;"
+    elif fl.code == "BELOW_MINIMUM":
+        cells = [("Commitment", f"US${(fig or wv or 0):,.0f}"), ("Fund minimum", f"US${MINIMUM_COMMITMENT_USD:,.0f}")]
+        op = "&lt;"
+    elif fl.code == "TAX_FORM_MISMATCH":
+        has = fields.get("tax_form")
+        cells = [("Investor", who_is(fields)),
+                 ("Must send", f"Form {expected_tax_form(fields.get('investor_type'), bool(fields.get('us_person')))}"),
+                 ("Booklet has", f"Form {has}" if has and has != "none" else "No form")]
+        op = "&ne;"
+    elif fl.code == "MISSING_SIGNATURE":
+        cells = [("Signature line", "Blank")]
+    elif fl.code == "NO_ACCREDITATION":
+        cells = [("Accredited-investor boxes", "None ticked")]
+    elif fl.code == "MISSING_SIGNATORY_TITLE":
+        cells = [("Signer's title", "Blank")]
+    parts = []
+    for i, (label, value) in enumerate(cells):
+        if i and op and (fl.code != "TAX_FORM_MISMATCH" or i == 2):
+            parts.append(f'<div class="op" aria-label="does not match">{op}</div>')
+        parts.append(f'<div class="cell"><span>{label}</span><b>{value}</b></div>')
+    return f'<div class="cmp">{"".join(parts)}</div>'
+
+
+def fix_for(fl, fields: dict):
+    """The investor's correction, used to simulate the return-and-resubmit loop."""
+    if fl.code == "AMOUNT_MISMATCH":
+        fig = fields.get("commitment_amount_figures")
+        return f"confirms the commitment is US${fig:,.0f}", {"commitment_amount_words_value": fig}
+    if fl.code == "TAX_FORM_MISMATCH":
+        form = expected_tax_form(fields.get("investor_type"), bool(fields.get("us_person")))
+        return f"sends Form {form}", {"tax_form": form}
+    if fl.code == "MISSING_SIGNATURE":
+        return "signs the booklet", {"signed": True, "signature_date": "2026-11-20",
+                                     "signatory_name": fields.get("signatory_name") or fields.get("investor_name")}
+    if fl.code == "NO_ACCREDITATION":
+        basis = "entity_assets" if fields.get("investor_type") in ENTITY_TYPES else "net_worth"
+        return "ticks an accredited-investor box", {"accreditation_basis": basis}
+    if fl.code == "MISSING_SIGNATORY_TITLE":
+        return "adds the signer's title", {"signatory_title": "Director"}
+    return None  # below the minimum: not a paperwork error
+
+
+def timeline_html(pid: str, result, flags, critical, nonce: int) -> str:
+    filled = [f for f in FIELD_NAMES if result.fields.get(f) not in (None, False)]
+    # Time the two code steps for real: the evidence check and the rules.
+    t0 = time.perf_counter()
+    grounded_map = ground([Evidence(**e) for e in result.evidence], page_texts(PACKETS / f"{pid}.pdf"))
+    t1 = time.perf_counter()
+    check(result.fields)
+    t2 = time.perf_counter()
+    grounded = sum(1 for f in filled if grounded_map.get(f))
+    ms = lambda a, b: f"+{(b - a) * 1000:.0f} ms" if (b - a) >= 0.0005 else "+<1 ms"
+    if critical:
+        verdict, vkind = "Not in good order: sent to the reviewer", "crit"
+    elif flags or result.needs_review:
+        verdict, vkind = "Needs review: sent to the reviewer", "warn"
+    else:
+        verdict, vkind = "In good order: no reviewer needed", "ok"
+    problems = ", ".join(FLAG_TITLES.get(f.code, f.code) for f in flags) or "no problems found"
+    steps = [
+        ("0 s", "Booklet received", f"4-page PDF from {TRUTH[pid]['fields']['investor_name']}", ""),
+        (f"{result.latency_s:.1f} s", "AI reads every page",
+         f"{len(filled)} values read, each with the sentence it came from", ""),
+        (ms(t0, t1), "Evidence check", f"{grounded} of {len(filled)} quotes found on the page they cite", ""),
+        (ms(t1, t2), "Fund rules applied", f"6 checks run: {problems}", ""),
+        ("Result", verdict.split(":")[0], verdict.split(": ")[1], vkind),
+    ]
+    items = "".join(
+        f'<li class="tl-step {k}" style="--d:{i * 0.45:.2f}s"><span class="tl-dot"></span>'
+        f'<span class="tl-time">{t}</span><span class="tl-title">{title}</span><span class="tl-desc">{d}</span></li>'
+        for i, (t, title, d, k) in enumerate(steps))
+    return f'<!-- {nonce} --><ol class="tl" aria-label="What happened when this booklet was checked">{items}</ol>'
+
+
+def section(n: int, title: str):
+    st.html(f'<div class="sec"><span class="sec-n">{n}</span>{title}</div>')
+
+
 def step_review():
     pid = st.session_state.pid
     result = result_for(pid)
@@ -382,8 +538,8 @@ def step_review():
         st.warning("There is no saved result for this booklet yet. Run the test to create one.")
         return
 
-    # Apply reviewer edits (kept by the editor widget) before running the rules.
-    ekey = f"editor-{pid}"
+    # Values the rules see: the AI's reading, then reviewer edits, then a simulated investor correction.
+    ekey, okey = f"editor-{pid}", f"override-{pid}"
     fields = dict(result.fields)
     edits = {}
     for idx, change in st.session_state.get(ekey, {}).get("edited_rows", {}).items():
@@ -392,84 +548,129 @@ def step_review():
             fields[f] = parse(f, change["Value"])
             if show(f, fields[f]) != show(f, result.fields.get(f)):
                 edits[f] = {"model": result.fields.get(f), "reviewer": fields[f]}
+    override = st.session_state.get(okey)
+    if override:
+        fields.update(override["fields"])
     flags = check(fields)
     critical = [f for f in flags if f.severity == CRITICAL]
+    original_flags = check(result.fields)
     if critical:
         state_badge = badge("crit", f"Not in good order: {plural(len(critical), 'serious error')}")
-    elif flags or result.needs_review:
+    elif flags or (result.needs_review and not override):
         state_badge = badge("warn", "Needs review")
     else:
         state_badge = badge("ok", "In good order")
 
-    header(f"Booklet {pid}", f'{TRUTH[pid]["fields"]["investor_name"]}', "")
-    st.html(f'<div style="margin:-6px 0 12px">{state_badge}</div>'
-            f'<div class="flow" aria-label="How the review works">'
-            f'<span><b>1</b> AI reads the booklet ({result.latency_s:.0f} seconds)</span>'
-            f'<span><b>2</b> Fixed rules check it against the fund terms</span>'
-            f'<span><b>3</b> The reviewer decides</span></div>')
+    header(f"Booklet {pid}", TRUTH[pid]["fields"]["investor_name"], "")
+    st.html(f'<div style="margin:-6px 0 14px">{state_badge}</div>')
+
+    # What happened, replayed step by step.
+    nonce = st.session_state.get(f"replay-{pid}", 0)
+    st.html('<div class="h3">What happened when this booklet arrived</div>'
+            + timeline_html(pid, result, original_flags, [f for f in original_flags if f.severity == CRITICAL], nonce))
+    st.button("Replay", icon=":material/replay:", key=f"replay-btn-{pid}",
+              on_click=lambda: st.session_state.update({f"replay-{pid}": nonce + 1}))
 
     ev = {}
     for e in result.evidence:
         ev.setdefault(e["field"], []).append(e)
-    flag_pages = [e["page"] for fl in flags for e in flag_evidence(fl, ev)]
+    flag_pages = [e["page"] for fl in original_flags for e in flag_evidence(fl, ev)]
     page_key = f"page-{pid}"
     if page_key not in st.session_state:
         st.session_state[page_key] = flag_pages[0] if flag_pages else 1
 
-    left, right = st.columns([1.05, 1], gap="large")
+    left, right = st.columns([1, 1.05], gap="large")
     with right:
-        st.html('<div class="h3">What the check found</div>')
+        section(2, "What the check found")
         if not flags:
-            st.html('<div class="big-ok"><b>In good order.</b> No rule found a problem, and every value the AI read '
-                    'is backed by a quote found on the page. This booklet would not need a reviewer.</div>')
+            msg = ("No rule finds a problem any more. The booklet is in good order and can be approved."
+                   if override or edits else
+                   "No rule found a problem, and every value the AI read is backed by a quote found on the page. "
+                   "This booklet would not need a reviewer.")
+            st.html(f'<div class="big-ok"><b>In good order.</b> {msg}</div>')
         for fl in flags:
             kind = "crit" if fl.severity == CRITICAL else "warn"
-            quotes = flag_evidence(fl, ev)[:2]
-            qhtml = "".join(f'<div class="quote">p.{e["page"]}: ' + (f'left blank under "{e["quote"]}"' if e.get("blank") else f'"{e["quote"]}"') + '</div><br>' for e in quotes)
+            quotes = flag_evidence(fl, ev)
             st.html(f'<div class="finding {kind}">{badge(kind, "Serious" if kind == "crit" else "Minor")}'
                     f'<div class="t">{FLAG_TITLES.get(fl.code, fl.code)}</div>'
-                    f'<div class="m">{fl.message}</div>{qhtml}</div>')
-            if quotes:
-                st.button(f"Show on page {quotes[0]['page']}", key=f"show-{pid}-{fl.code}",
-                          icon=":material/visibility:",
-                          on_click=lambda p=quotes[0]["page"]: st.session_state.update({page_key: p}))
+                    f'<div class="m">{fl.message}</div>{proof_html(fl, fields)}</div>')
+            same_page = [e for e in quotes if e["page"] == quotes[0]["page"]] if quotes else []
+            if same_page:
+                strip = evidence_strip(pid, same_page[0]["page"] - 1, tuple(e["quote"] for e in same_page),
+                                       "critical" if kind == "crit" else "warning")
+                if strip is not None:
+                    st.image(strip, use_container_width=True,
+                             caption=f"Zoomed from page {same_page[0]['page']}"
+                                     + (" (the box was left blank)" if same_page[0].get("blank") else ""))
         flagged_fields = {fd for fl in flags for fd in fl.fields}
-        unsure = [n for n in result.needs_review if n not in flagged_fields]
+        unsure = [n for n in result.needs_review if n not in flagged_fields] if not override else []
         if unsure:
             st.html('<div class="finding warn">' + badge("warn", "Needs review") +
                     '<div class="t">The AI was unsure about</div><div class="m">'
                     + ", ".join(LABELS.get(n, n) for n in unsure) + '</div></div>')
-        if pid == "SUB-018" and flags:
-            note("The hardest error in the test: US$1,500,000 in figures, but \"One Million Fifty Thousand\" in "
-                 "words. The AI reads both separately and a fixed rule compares them. A reviewer skimming the "
-                 "page sees two numbers that both look reasonable.")
+        if pid == "SUB-018" and original_flags and not override:
+            note("This is the hardest error in the test. Both amounts look plausible on the page, and a person "
+                 "skimming it would likely accept it. The AI turns the words into a number on its own, and a "
+                 "fixed rule compares the two.")
         else:
             note("The AI reads, fixed rules decide, and a person approves. The AI never decides pass or fail "
                  "itself: every problem comes from a written rule, so it can be explained to the investor or "
                  "an auditor.")
 
-        st.html('<div class="h3">Reviewer decision</div>')
+        section(3, "Reviewer decision")
         d1, d2 = st.columns(2)
         approved = d1.button("Approve", type="primary", icon=":material/check:", key=f"approve-{pid}",
                              disabled=bool(critical), use_container_width=True,
                              help="Not available while a serious error remains.")
         returned = d2.button("Return to investor", icon=":material/undo:", key=f"return-{pid}",
-                             use_container_width=True)
+                             use_container_width=True, disabled=not flags)
         trail = st.session_state.trail.setdefault(pid, [])
         if approved:
             log_decision(pid, "approved", flags, edits)
-            trail.append(f"{time.strftime('%H:%M')} Reviewer approved" + (f" after {plural(len(edits), 'correction')}" if edits else ""))
+            trail.append(f"{time.strftime('%H:%M')} Reviewer approved"
+                         + (f" after {plural(len(edits), 'correction')}" if edits else ""))
             st.toast("Approved and recorded.", icon=":material/check:")
         if returned:
             log_decision(pid, "returned", flags, edits)
             trail.append(f"{time.strftime('%H:%M')} Reviewer returned the booklet to the investor")
-        if returned or st.session_state.get(f"draft-{pid}"):
             st.session_state[f"draft-{pid}"] = True
-            items = "\n".join(f"- {FLAG_TITLES.get(f.code, f.code)}: {f.message}" for f in flags) or \
-                    "- Please confirm the values marked for review."
-            st.text_area("Draft message to the investor (edit before sending)", height=150, key=f"note-{pid}",
+        if flags and st.session_state.get(f"draft-{pid}"):
+            items = "\n".join(f"- {FLAG_TITLES.get(f.code, f.code)}: {f.message}" for f in flags)
+            st.text_area("Draft message to the investor (written from the findings; edit before sending)",
+                         height=150, key=f"note-{pid}",
                          value=f"Thank you for your subscription. Before we can accept it into {FUND_NAME}, "
                                f"please correct the following:\n{items}")
+
+        # Close the loop: simulate the investor's correction and re-run the rules.
+        fixes = [fix_for(fl, result.fields) for fl in original_flags]
+        if original_flags:
+            section(4, "Close the loop")
+            if override:
+                st.html(f'<div class="big-ok"><b>Re-checked.</b> The investor {override["label"]}. '
+                        + ('No serious error remains, so the booklet can now be approved.' if not critical else '')
+                        + f'<br><span class="muted-p">Simulated here. In practice the AI reads the corrected '
+                          f'booklet again, which takes about {result.latency_s:.0f} seconds.</span></div>')
+                st.button("Reset this booklet", icon=":material/restart_alt:", key=f"reset-{pid}",
+                          on_click=lambda: st.session_state.pop(okey, None))
+            elif any(fixes):
+                labels = [f[0] for f in fixes if f]
+                merged = {k: v for f in fixes if f for k, v in f[1].items()}
+                st.html('<p class="muted-p">Today a returned booklet can mean days of emails before it is '
+                        'checked again. Here the corrected booklet goes straight back through the same check.</p>')
+                st.button("Simulate the investor's correction", icon=":material/mark_email_read:", type="primary",
+                          key=f"fix-{pid}", use_container_width=True,
+                          on_click=lambda: st.session_state.update({okey: {
+                              "label": " and ".join(labels), "fields": merged}}))
+                if any(f is None for f in fixes):
+                    st.caption("A commitment below the fund minimum is not a paperwork error, so it stays "
+                               "flagged until the investor raises the amount.")
+            else:
+                st.caption("A commitment below the fund minimum is not a paperwork error: the investor has to "
+                           "raise the amount, or the fund declines the subscription.")
+            if override:
+                trail_note = f"Investor correction (simulated): {override['label']}"
+                if trail_note not in trail:
+                    trail.append(trail_note)
 
         with st.expander("All values the AI read (edit to correct)"):
             rows = [{"Field": LABELS[f], "Value": show(f, result.fields.get(f)),
@@ -487,7 +688,8 @@ def step_review():
             base = [f"AI read the booklet: {result.model}, {result.latency_s:.1f} seconds, "
                     f"estimated cost ${result.cost_usd:.3f}",
                     f"Evidence check: {grounded} values backed by a quote found on the cited page",
-                    f"Rules: {plural(len(critical), 'serious error')}, {plural(len(flags) - len(critical), 'minor issue')}"]
+                    f"Rules: {plural(len([f for f in original_flags if f.severity == CRITICAL]), 'serious error')}, "
+                    f"{plural(len([f for f in original_flags if f.severity != CRITICAL]), 'minor issue')}"]
             st.html('<ul class="trail">' + "".join(f"<li>{t}</li>" for t in base + trail) + "</ul>")
         if not DEMO_MODE:
             if st.button("Run the AI again now", icon=":material/refresh:", key=f"rerun-{pid}"):
@@ -498,22 +700,30 @@ def step_review():
                     st.error(f"Could not run the model: {e}")
 
     with left:
+        section(1, "The booklet, with the evidence highlighted")
         page_no = st.segmented_control("Page", [1, 2, 3, 4], key=page_key,
-                                       format_func=lambda n: f"Page {n}") or 1
+                                       format_func=lambda n: f"Page {n}", label_visibility="collapsed") or 1
         marks = []
-        for fl in flags:
+        for fl in original_flags:
             for e in flag_evidence(fl, ev):
                 if e["page"] == page_no:
                     marks.append((e["quote"], "critical" if fl.severity == CRITICAL else "warning"))
-        if not flags:
+        if not original_flags:
             marks = [(e["quote"], "ok") for es in ev.values() for e in es if e["page"] == page_no]
         img, found = page_image(pid, page_no - 1, tuple(marks))
         st.image(img, use_container_width=True)
         if marks:
             st.caption(f"Highlighted: {plural(found, 'passage')} on this page behind the problems listed."
-                       if flags else f"Highlighted: {plural(found, 'passage')} the AI read on this page.")
+                       if original_flags else f"Highlighted in green: {plural(found, 'passage')} the AI read on this page.")
+        elif flag_pages:
+            st.caption(f"Nothing flagged on this page. The problems are on page {', '.join(map(str, sorted(set(flag_pages))))}.")
 
     nav("queue", "trust")
+
+
+@st.cache_data(show_spinner=False)
+def evidence_strip(pid: str, page_index: int, quotes: tuple, kind: str):
+    return crop_strip(pdf_bytes(pid), page_index, list(quotes), kind)
 
 
 def log_decision(pid, decision, flags, edits):
