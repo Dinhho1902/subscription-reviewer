@@ -4,6 +4,8 @@ An AI review layer for offline private-fund subscription booklets: Claude reads 
 the result against fund rules, and a reviewer handles only the exceptions. Why it is worth building:
 see [MEMO.md](MEMO.md).
 
+**Live demo:** https://subscription-reviewer.streamlit.app (shows the recorded eval results; live model calls are off).
+
 All funds, investors and documents in this repo are synthetic.
 
 
