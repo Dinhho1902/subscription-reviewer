@@ -309,8 +309,8 @@ def sorter_html(with_ai: bool, n_ok: int, n_rev: int, secs: str) -> str:
     incoming = (f'<div class="sbox"><div class="scap">Booklets received</div><div class="docs">{docs(total, "grey")}</div>'
                 f'<div class="ssub">{total} booklets, {total * 4} pages</div></div>')
     if not with_ai:
-        return (f'<div class="sorter">{incoming}<div class="sarrow"><span>every page, by hand</span></div>'
-                f'<div class="sbox wide"><div class="scap">Reviewer</div><div class="big">{total} booklets to open</div>'
+        return (f'<div class="sorter">{incoming}<div class="sarrow"></div>'
+                f'<div class="sbox wide"><div class="scap">Reviewer, by hand</div><div class="big">{total} booklets to open</div>'
                 f'<div class="ssub">{total * 4} pages to read. Clean booklets take as long as the ones with '
                 f'errors, and the errors only show up when someone reaches that page.</div></div></div>')
     engine = (f'<div class="sengine"><div class="etitle">AI pre-check</div>'
