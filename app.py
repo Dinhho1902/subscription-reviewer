@@ -89,13 +89,19 @@ def log_decision(packet: str, decision: str, flags, edits, note: str):
 
 # ---------- sidebar: choose a packet ----------
 
+# Public demo: no model access, so only results recorded by the eval run are shown.
+DEMO_MODE = os.environ.get("REVIEWER_BACKEND") != "claude-code" and not os.environ.get("ANTHROPIC_API_KEY")
+
 with st.sidebar:
     st.header("Subscription Reviewer")
     st.caption(f"{FUND_NAME}  \nMinimum commitment: ${MINIMUM_COMMITMENT_USD:,.0f}")
+    if DEMO_MODE:
+        st.info("Public demo: showing Claude's recorded results from the eval run on 20 synthetic "
+                "booklets. Live model calls and uploads are off.", icon=":material/info:")
     source = st.segmented_control("Packet source", ["Sample packets", "Upload PDF"],
-                                  default="Sample packets")
+                                  default="Sample packets", disabled=DEMO_MODE)
     pdf_path = None
-    if source == "Upload PDF":
+    if source == "Upload PDF" and not DEMO_MODE:
         up = st.file_uploader("Subscription booklet (PDF)", type="pdf")
         if up:
             UPLOADS.mkdir(parents=True, exist_ok=True)
@@ -104,11 +110,11 @@ with st.sidebar:
     else:
         pid = st.selectbox("Sample packet", sorted(TRUTH), format_func=packet_label)
         pdf_path = PACKETS / f"{pid}.pdf"
-    refresh = st.toggle("Fresh model call (ignore cache)", value=False)
+    refresh = st.toggle("Fresh model call (ignore cache)", value=False, disabled=DEMO_MODE)
     run = st.button("Review packet", type="primary", use_container_width=True,
                     disabled=pdf_path is None)
-    if os.environ.get("REVIEWER_BACKEND") != "claude-code" and not os.environ.get("ANTHROPIC_API_KEY"):
-        st.caption(":material/info: No ANTHROPIC_API_KEY set: only cached results can be shown.")
+    st.caption("[Product case (MEMO.md)](https://github.com/Dinhho1902/subscription-reviewer/blob/main/MEMO.md)"
+               " | [Code](https://github.com/Dinhho1902/subscription-reviewer)")
 
 tab_why, tab_review, tab_evals, tab_how = st.tabs(["Why this product", "Review", "Evals", "How it works"])
 
@@ -279,7 +285,8 @@ with tab_evals:
 with tab_why:
     st.subheader("Know in minutes whether a subscription is in good order")
     st.markdown("An AI review layer for offline subscription booklets: it checks every field with "
-                "evidence and leaves only the exceptions for a human. Full case and sources: `MEMO.md`.")
+                "evidence and leaves only the exceptions for a human. Full case and sources: "
+                "[MEMO.md](https://github.com/Dinhho1902/subscription-reviewer/blob/main/MEMO.md).")
     c1, c2, c3 = st.columns(3)
     c1.metric("GPs saying KYC adds 6-30 days to a close", "74%", help="IQ-EQ fund managers survey, Apr 2026")
     c2.metric("GPs who lost investors over AML/KYC", "63%", help="CSC survey of 200 GPs and 200 LPs, Nov 2025")
